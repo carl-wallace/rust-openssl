@@ -1,4 +1,4 @@
-use openssl_src;
+use openssl_src_10_55 as openssl_src;
 use std::path::PathBuf;
 
 pub fn get_openssl(_target: &str) -> (Vec<PathBuf>, PathBuf) {

@@ -46,6 +46,7 @@
 //! ```
 #![warn(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/openssl-errors/0.2")]
+#![allow(unexpected_cfgs)]
 
 use cfg_if::cfg_if;
 use libc::{c_char, c_int};
@@ -56,7 +57,7 @@ use std::ptr;
 #[doc(hidden)]
 pub mod export {
     pub use libc::{c_char, c_int};
-    pub use openssl_sys::{
+    pub use openssl_sys_10_55::{
         init, ERR_get_next_error_library, ERR_load_strings, ERR_PACK, ERR_STRING_DATA,
     };
     pub use std::borrow::Cow;
@@ -161,7 +162,7 @@ unsafe fn put_error_inner(
             );
             openssl_sys::ERR_set_error(library, reason, ptr::null());
         } else {
-            openssl_sys::ERR_put_error(
+            openssl_sys_10_55::ERR_put_error(
                 library,
                 func,
                 reason,
@@ -174,7 +175,7 @@ unsafe fn put_error_inner(
     let data = match message {
         Some(Cow::Borrowed(s)) => Some((s.as_ptr() as *const c_char as *mut c_char, 0)),
         Some(Cow::Owned(s)) => {
-            let ptr = openssl_sys::CRYPTO_malloc(
+            let ptr = openssl_sys_10_55::CRYPTO_malloc(
                 s.len() as _,
                 concat!(file!(), "\0").as_ptr() as *const c_char,
                 line!() as c_int,
@@ -183,13 +184,13 @@ unsafe fn put_error_inner(
                 None
             } else {
                 ptr::copy_nonoverlapping(s.as_ptr(), ptr as *mut u8, s.len());
-                Some((ptr, openssl_sys::ERR_TXT_MALLOCED))
+                Some((ptr, openssl_sys_10_55::ERR_TXT_MALLOCED))
             }
         }
         None => None,
     };
     if let Some((ptr, flags)) = data {
-        openssl_sys::ERR_set_error_data(ptr, flags | openssl_sys::ERR_TXT_STRING);
+        openssl_sys_10_55::ERR_set_error_data(ptr, flags | openssl_sys_10_55::ERR_TXT_STRING);
     }
 }
 
