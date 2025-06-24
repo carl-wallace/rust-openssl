@@ -1,8 +1,8 @@
 //! Interface for processing OpenSSL configuration files.
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::CONF;
-    fn drop = ffi::NCONF_free;
+    type CType = ffi_10_55::CONF;
+    fn drop = ffi_10_55::NCONF_free;
 
     pub struct Conf;
     pub struct ConfRef;
@@ -15,7 +15,7 @@ mod methods {
     use crate::error::ErrorStack;
     use openssl_macros::corresponds;
 
-    pub struct ConfMethod(*mut ffi::CONF_METHOD);
+    pub struct ConfMethod(*mut ffi_10_55::CONF_METHOD);
 
     impl ConfMethod {
         /// Retrieve handle to the default OpenSSL configuration file processing function.
@@ -23,10 +23,10 @@ mod methods {
         #[allow(clippy::should_implement_trait)]
         pub fn default() -> ConfMethod {
             unsafe {
-                ffi::init();
+                ffi_10_55::init();
                 // `NCONF` stands for "New Conf", as described in crypto/conf/conf_lib.c. This is
                 // a newer API than the "CONF classic" functions.
-                ConfMethod(ffi::NCONF_default())
+                ConfMethod(ffi_10_55::NCONF_default())
             }
         }
 
@@ -35,12 +35,12 @@ mod methods {
         /// # Safety
         ///
         /// The caller must ensure that the pointer is valid.
-        pub unsafe fn from_ptr(ptr: *mut ffi::CONF_METHOD) -> ConfMethod {
+        pub unsafe fn from_ptr(ptr: *mut ffi_10_55::CONF_METHOD) -> ConfMethod {
             ConfMethod(ptr)
         }
 
         /// Convert to raw pointer.
-        pub fn as_ptr(&self) -> *mut ffi::CONF_METHOD {
+        pub fn as_ptr(&self) -> *mut ffi_10_55::CONF_METHOD {
             self.0
         }
     }
@@ -57,7 +57,7 @@ mod methods {
         /// ```
         #[corresponds(NCONF_new)]
         pub fn new(method: ConfMethod) -> Result<Conf, ErrorStack> {
-            unsafe { cvt_p(ffi::NCONF_new(method.as_ptr())).map(Conf) }
+            unsafe { cvt_p(ffi_10_55::NCONF_new(method.as_ptr())).map(Conf) }
         }
     }
 }

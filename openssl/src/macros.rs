@@ -5,7 +5,7 @@ macro_rules! private_key_from_pem {
         $(#[$m2])*
         pub fn $n2(pem: &[u8], passphrase: &[u8]) -> Result<$t, crate::error::ErrorStack> {
             unsafe {
-                ffi::init();
+                ffi_10_55::init();
                 let bio = crate::bio::MemBioSlice::new(pem)?;
                 let passphrase = ::std::ffi::CString::new(passphrase).unwrap();
                 cvt_p($f(bio.as_ptr(),
@@ -21,7 +21,7 @@ macro_rules! private_key_from_pem {
             where F: FnOnce(&mut [u8]) -> Result<usize, crate::error::ErrorStack>
         {
             unsafe {
-                ffi::init();
+                ffi_10_55::init();
                 let mut cb = crate::util::CallbackState::new(callback);
                 let bio = crate::bio::MemBioSlice::new(pem)?;
                 cvt_p($f(bio.as_ptr(),
@@ -108,7 +108,7 @@ macro_rules! from_der {
         pub fn $n(der: &[u8]) -> Result<$t, crate::error::ErrorStack> {
             use std::convert::TryInto;
             unsafe {
-                ffi::init();
+                ffi_10_55::init();
                 let len = ::std::cmp::min(der.len(), ::libc::c_long::max_value() as usize) as ::libc::c_long;
                 crate::cvt_p($f(::std::ptr::null_mut(), &mut der.as_ptr(), len.try_into().unwrap()))
                     .map(|p| ::foreign_types::ForeignType::from_ptr(p))

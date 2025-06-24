@@ -15,8 +15,8 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::PKCS7;
-    fn drop = ffi::PKCS7_free;
+    type CType = ffi_10_55::PKCS7;
+    fn drop = ffi_10_55::PKCS7_free;
 
     /// A PKCS#7 structure.
     ///
@@ -29,24 +29,24 @@ foreign_type_and_impl_send_sync! {
 
 bitflags! {
     pub struct Pkcs7Flags: c_int {
-        const TEXT = ffi::PKCS7_TEXT;
-        const NOCERTS = ffi::PKCS7_NOCERTS;
-        const NOSIGS = ffi::PKCS7_NOSIGS;
-        const NOCHAIN = ffi::PKCS7_NOCHAIN;
-        const NOINTERN = ffi::PKCS7_NOINTERN;
-        const NOVERIFY = ffi::PKCS7_NOVERIFY;
-        const DETACHED = ffi::PKCS7_DETACHED;
-        const BINARY = ffi::PKCS7_BINARY;
-        const NOATTR = ffi::PKCS7_NOATTR;
-        const NOSMIMECAP = ffi::PKCS7_NOSMIMECAP;
-        const NOOLDMIMETYPE = ffi::PKCS7_NOOLDMIMETYPE;
-        const CRLFEOL = ffi::PKCS7_CRLFEOL;
-        const STREAM = ffi::PKCS7_STREAM;
-        const NOCRL = ffi::PKCS7_NOCRL;
-        const PARTIAL = ffi::PKCS7_PARTIAL;
-        const REUSE_DIGEST = ffi::PKCS7_REUSE_DIGEST;
+        const TEXT = ffi_10_55::PKCS7_TEXT;
+        const NOCERTS = ffi_10_55::PKCS7_NOCERTS;
+        const NOSIGS = ffi_10_55::PKCS7_NOSIGS;
+        const NOCHAIN = ffi_10_55::PKCS7_NOCHAIN;
+        const NOINTERN = ffi_10_55::PKCS7_NOINTERN;
+        const NOVERIFY = ffi_10_55::PKCS7_NOVERIFY;
+        const DETACHED = ffi_10_55::PKCS7_DETACHED;
+        const BINARY = ffi_10_55::PKCS7_BINARY;
+        const NOATTR = ffi_10_55::PKCS7_NOATTR;
+        const NOSMIMECAP = ffi_10_55::PKCS7_NOSMIMECAP;
+        const NOOLDMIMETYPE = ffi_10_55::PKCS7_NOOLDMIMETYPE;
+        const CRLFEOL = ffi_10_55::PKCS7_CRLFEOL;
+        const STREAM = ffi_10_55::PKCS7_STREAM;
+        const NOCRL = ffi_10_55::PKCS7_NOCRL;
+        const PARTIAL = ffi_10_55::PKCS7_PARTIAL;
+        const REUSE_DIGEST = ffi_10_55::PKCS7_REUSE_DIGEST;
         #[cfg(not(any(ossl101, ossl102, libressl)))]
-        const NO_DUAL_CONTENT = ffi::PKCS7_NO_DUAL_CONTENT;
+        const NO_DUAL_CONTENT = ffi_10_55::PKCS7_NO_DUAL_CONTENT;
     }
 }
 
@@ -58,7 +58,7 @@ impl Pkcs7 {
         #[corresponds(PEM_read_bio_PKCS7)]
         from_pem,
         Pkcs7,
-        ffi::PEM_read_bio_PKCS7
+        ffi_10_55::PEM_read_bio_PKCS7
     }
 
     from_der! {
@@ -66,7 +66,7 @@ impl Pkcs7 {
         #[corresponds(d2i_PKCS7)]
         from_der,
         Pkcs7,
-        ffi::d2i_PKCS7
+        ffi_10_55::d2i_PKCS7
     }
 
     /// Parses a message in S/MIME format.
@@ -75,13 +75,13 @@ impl Pkcs7 {
     /// available).
     #[corresponds(SMIME_read_PKCS7)]
     pub fn from_smime(input: &[u8]) -> Result<(Pkcs7, Option<Vec<u8>>), ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         let input_bio = MemBioSlice::new(input)?;
         let mut bcont_bio = ptr::null_mut();
         unsafe {
             let pkcs7 =
-                cvt_p(ffi::SMIME_read_PKCS7(input_bio.as_ptr(), &mut bcont_bio)).map(Pkcs7)?;
+                cvt_p(ffi_10_55::SMIME_read_PKCS7(input_bio.as_ptr(), &mut bcont_bio)).map(Pkcs7)?;
             let out = if !bcont_bio.is_null() {
                 let bcont_bio = MemBio::from_ptr(bcont_bio);
                 Some(bcont_bio.get_buf().to_vec())
@@ -107,7 +107,7 @@ impl Pkcs7 {
         let input_bio = MemBioSlice::new(input)?;
 
         unsafe {
-            cvt_p(ffi::PKCS7_encrypt(
+            cvt_p(ffi_10_55::PKCS7_encrypt(
                 certs.as_ptr(),
                 input_bio.as_ptr(),
                 cipher.as_ptr(),
@@ -136,7 +136,7 @@ impl Pkcs7 {
     {
         let input_bio = MemBioSlice::new(input)?;
         unsafe {
-            cvt_p(ffi::PKCS7_sign(
+            cvt_p(ffi_10_55::PKCS7_sign(
                 signcert.as_ptr(),
                 pkey.as_ptr(),
                 certs.as_ptr(),
@@ -155,7 +155,7 @@ impl Pkcs7Ref {
         let input_bio = MemBioSlice::new(input)?;
         let output = MemBio::new()?;
         unsafe {
-            cvt(ffi::SMIME_write_PKCS7(
+            cvt(ffi_10_55::SMIME_write_PKCS7(
                 output.as_ptr(),
                 self.as_ptr(),
                 input_bio.as_ptr(),
@@ -171,14 +171,14 @@ impl Pkcs7Ref {
         /// The output will have a header of `-----BEGIN PKCS7-----`.
         #[corresponds(PEM_write_bio_PKCS7)]
         to_pem,
-        ffi::PEM_write_bio_PKCS7
+        ffi_10_55::PEM_write_bio_PKCS7
     }
 
     to_der! {
         /// Serializes the data into a DER-encoded PKCS#7 structure.
         #[corresponds(i2d_PKCS7)]
         to_der,
-        ffi::i2d_PKCS7
+        ffi_10_55::i2d_PKCS7
     }
 
     /// Decrypts data using the provided private key.
@@ -200,7 +200,7 @@ impl Pkcs7Ref {
         let output = MemBio::new()?;
 
         unsafe {
-            cvt(ffi::PKCS7_decrypt(
+            cvt(ffi_10_55::PKCS7_decrypt(
                 self.as_ptr(),
                 pkey.as_ptr(),
                 cert.as_ptr(),
@@ -235,7 +235,7 @@ impl Pkcs7Ref {
         let indata_bio_ptr = indata_bio.as_ref().map_or(ptr::null_mut(), |p| p.as_ptr());
 
         unsafe {
-            cvt(ffi::PKCS7_verify(
+            cvt(ffi_10_55::PKCS7_verify(
                 self.as_ptr(),
                 certs.as_ptr(),
                 store.as_ptr(),
@@ -262,7 +262,7 @@ impl Pkcs7Ref {
         flags: Pkcs7Flags,
     ) -> Result<Stack<X509>, ErrorStack> {
         unsafe {
-            let ptr = cvt_p(ffi::PKCS7_get0_signers(
+            let ptr = cvt_p(ffi_10_55::PKCS7_get0_signers(
                 self.as_ptr(),
                 certs.as_ptr(),
                 flags.bits,

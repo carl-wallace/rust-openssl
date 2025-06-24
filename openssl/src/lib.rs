@@ -123,7 +123,7 @@
 #![allow(unexpected_cfgs)]
 
 #[doc(inline)]
-pub use ffi::init;
+pub use ffi_10_55::init;
 
 use libc::c_int;
 

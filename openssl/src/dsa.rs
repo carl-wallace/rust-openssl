@@ -21,8 +21,8 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::DSA;
-    fn drop = ffi::DSA_free;
+    type CType = ffi_10_55::DSA;
+    fn drop = ffi_10_55::DSA_free;
 
     /// Object representing DSA keys.
     ///
@@ -73,7 +73,7 @@ impl<T> ToOwned for DsaRef<T> {
 
     fn to_owned(&self) -> Dsa<T> {
         unsafe {
-            ffi::DSA_up_ref(self.as_ptr());
+            ffi_10_55::DSA_up_ref(self.as_ptr());
             Dsa::from_ptr(self.as_ptr())
         }
     }
@@ -89,14 +89,14 @@ where
         /// The output will have a header of `-----BEGIN PUBLIC KEY-----`.
         #[corresponds(PEM_write_bio_DSA_PUBKEY)]
         public_key_to_pem,
-        ffi::PEM_write_bio_DSA_PUBKEY
+        ffi_10_55::PEM_write_bio_DSA_PUBKEY
     }
 
     to_der! {
         /// Serializes the public key into a DER-encoded SubjectPublicKeyInfo structure.
         #[corresponds(i2d_DSA_PUBKEY)]
         public_key_to_der,
-        ffi::i2d_DSA_PUBKEY
+        ffi_10_55::i2d_DSA_PUBKEY
     }
 
     /// Returns a reference to the public key component of `self`.
@@ -125,14 +125,14 @@ where
         /// The output will have a header of `-----BEGIN DSA PRIVATE KEY-----`.
         #[corresponds(PEM_write_bio_DSAPrivateKey)]
         private_key_to_pem_passphrase,
-        ffi::PEM_write_bio_DSAPrivateKey
+        ffi_10_55::PEM_write_bio_DSAPrivateKey
     }
 
     to_der! {
         /// Serializes the private_key to a DER-encoded `DSAPrivateKey` structure.
         #[corresponds(i2d_DSAPrivateKey)]
         private_key_to_der,
-        ffi::i2d_DSAPrivateKey
+        ffi_10_55::i2d_DSAPrivateKey
     }
 
     /// Returns a reference to the private key component of `self`.
@@ -153,7 +153,7 @@ where
     /// Returns the maximum size of the signature output by `self` in bytes.
     #[corresponds(DSA_size)]
     pub fn size(&self) -> u32 {
-        unsafe { ffi::DSA_size(self.as_ptr()) as u32 }
+        unsafe { ffi_10_55::DSA_size(self.as_ptr()) as u32 }
     }
 
     /// Returns the DSA prime parameter of `self`.
@@ -196,7 +196,7 @@ impl Dsa<Params> {
     #[corresponds(DSA_set0_pqg)]
     pub fn from_pqg(p: BigNum, q: BigNum, g: BigNum) -> Result<Dsa<Params>, ErrorStack> {
         unsafe {
-            let dsa = Dsa::from_ptr(cvt_p(ffi::DSA_new())?);
+            let dsa = Dsa::from_ptr(cvt_p(ffi_10_55::DSA_new())?);
             cvt(DSA_set0_pqg(dsa.0, p.as_ptr(), q.as_ptr(), g.as_ptr()))?;
             mem::forget((p, q, g));
             Ok(dsa)
@@ -206,10 +206,10 @@ impl Dsa<Params> {
     /// Generates DSA params based on the given number of bits.
     #[corresponds(DSA_generate_parameters_ex)]
     pub fn generate_params(bits: u32) -> Result<Dsa<Params>, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
         unsafe {
-            let dsa = Dsa::from_ptr(cvt_p(ffi::DSA_new())?);
-            cvt(ffi::DSA_generate_parameters_ex(
+            let dsa = Dsa::from_ptr(cvt_p(ffi_10_55::DSA_new())?);
+            cvt(ffi_10_55::DSA_generate_parameters_ex(
                 dsa.0,
                 bits as BitType,
                 ptr::null(),
@@ -227,7 +227,7 @@ impl Dsa<Params> {
     pub fn generate_key(self) -> Result<Dsa<Private>, ErrorStack> {
         unsafe {
             let dsa_ptr = self.0;
-            cvt(ffi::DSA_generate_key(dsa_ptr))?;
+            cvt(ffi_10_55::DSA_generate_key(dsa_ptr))?;
             mem::forget(self);
             Ok(Dsa::from_ptr(dsa_ptr))
         }
@@ -255,9 +255,9 @@ impl Dsa<Private> {
         priv_key: BigNum,
         pub_key: BigNum,
     ) -> Result<Dsa<Private>, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
         unsafe {
-            let dsa = Dsa::from_ptr(cvt_p(ffi::DSA_new())?);
+            let dsa = Dsa::from_ptr(cvt_p(ffi_10_55::DSA_new())?);
             cvt(DSA_set0_pqg(dsa.0, p.as_ptr(), q.as_ptr(), g.as_ptr()))?;
             mem::forget((p, q, g));
             cvt(DSA_set0_key(dsa.0, pub_key.as_ptr(), priv_key.as_ptr()))?;
@@ -275,7 +275,7 @@ impl Dsa<Public> {
         #[corresponds(PEM_read_bio_DSA_PUBKEY)]
         public_key_from_pem,
         Dsa<Public>,
-        ffi::PEM_read_bio_DSA_PUBKEY
+        ffi_10_55::PEM_read_bio_DSA_PUBKEY
     }
 
     from_der! {
@@ -283,7 +283,7 @@ impl Dsa<Public> {
         #[corresponds(d2i_DSA_PUBKEY)]
         public_key_from_der,
         Dsa<Public>,
-        ffi::d2i_DSA_PUBKEY
+        ffi_10_55::d2i_DSA_PUBKEY
     }
 
     /// Create a new DSA key with only public components.
@@ -296,9 +296,9 @@ impl Dsa<Public> {
         g: BigNum,
         pub_key: BigNum,
     ) -> Result<Dsa<Public>, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
         unsafe {
-            let dsa = Dsa::from_ptr(cvt_p(ffi::DSA_new())?);
+            let dsa = Dsa::from_ptr(cvt_p(ffi_10_55::DSA_new())?);
             cvt(DSA_set0_pqg(dsa.0, p.as_ptr(), q.as_ptr(), g.as_ptr()))?;
             mem::forget((p, q, g));
             cvt(DSA_set0_key(dsa.0, pub_key.as_ptr(), ptr::null_mut()))?;
@@ -316,14 +316,14 @@ impl<T> fmt::Debug for Dsa<T> {
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl273, boringssl))] {
-        use ffi::{DSA_get0_key, DSA_get0_pqg, DSA_set0_key, DSA_set0_pqg};
+        use ffi_10_55::{DSA_get0_key, DSA_get0_pqg, DSA_set0_key, DSA_set0_pqg};
     } else {
         #[allow(bad_style)]
         unsafe fn DSA_get0_pqg(
-            d: *mut ffi::DSA,
-            p: *mut *const ffi::BIGNUM,
-            q: *mut *const ffi::BIGNUM,
-            g: *mut *const ffi::BIGNUM)
+            d: *mut ffi_10_55::DSA,
+            p: *mut *const ffi_10_55::BIGNUM,
+            q: *mut *const ffi_10_55::BIGNUM,
+            g: *mut *const ffi_10_55::BIGNUM)
         {
             if !p.is_null() {
                 *p = (*d).p;
@@ -338,9 +338,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DSA_get0_key(
-            d: *mut ffi::DSA,
-            pub_key: *mut *const ffi::BIGNUM,
-            priv_key: *mut *const ffi::BIGNUM)
+            d: *mut ffi_10_55::DSA,
+            pub_key: *mut *const ffi_10_55::BIGNUM,
+            priv_key: *mut *const ffi_10_55::BIGNUM)
         {
             if !pub_key.is_null() {
                 *pub_key = (*d).pub_key;
@@ -352,9 +352,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DSA_set0_key(
-            d: *mut ffi::DSA,
-            pub_key: *mut ffi::BIGNUM,
-            priv_key: *mut ffi::BIGNUM) -> c_int
+            d: *mut ffi_10_55::DSA,
+            pub_key: *mut ffi_10_55::BIGNUM,
+            priv_key: *mut ffi_10_55::BIGNUM) -> c_int
         {
             (*d).pub_key = pub_key;
             (*d).priv_key = priv_key;
@@ -363,10 +363,10 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DSA_set0_pqg(
-            d: *mut ffi::DSA,
-            p: *mut ffi::BIGNUM,
-            q: *mut ffi::BIGNUM,
-            g: *mut ffi::BIGNUM) -> c_int
+            d: *mut ffi_10_55::DSA,
+            p: *mut ffi_10_55::BIGNUM,
+            q: *mut ffi_10_55::BIGNUM,
+            g: *mut ffi_10_55::BIGNUM) -> c_int
         {
             (*d).p = p;
             (*d).q = q;
@@ -377,8 +377,8 @@ cfg_if! {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::DSA_SIG;
-    fn drop = ffi::DSA_SIG_free;
+    type CType = ffi_10_55::DSA_SIG;
+    fn drop = ffi_10_55::DSA_SIG_free;
 
     /// Object representing DSA signature.
     ///
@@ -439,7 +439,7 @@ impl DsaSig {
     #[corresponds(DSA_SIG_set0)]
     pub fn from_private_components(r: BigNum, s: BigNum) -> Result<Self, ErrorStack> {
         unsafe {
-            let sig = cvt_p(ffi::DSA_SIG_new())?;
+            let sig = cvt_p(ffi_10_55::DSA_SIG_new())?;
             DSA_SIG_set0(sig, r.as_ptr(), s.as_ptr());
             mem::forget((r, s));
             Ok(DsaSig::from_ptr(sig))
@@ -451,7 +451,7 @@ impl DsaSig {
         #[corresponds(d2i_DSA_SIG)]
         from_der,
         DsaSig,
-        ffi::d2i_DSA_SIG
+        ffi_10_55::d2i_DSA_SIG
     }
 }
 
@@ -469,7 +469,7 @@ impl DsaSigRef {
         /// Serializes the DSA signature into a DER-encoded `DSASignature` structure.
         #[corresponds(i2d_DSA_SIG)]
         to_der,
-        ffi::i2d_DSA_SIG
+        ffi_10_55::i2d_DSA_SIG
     }
 
     /// Returns internal component `r` of an `DsaSig`.
@@ -495,19 +495,19 @@ impl DsaSigRef {
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl273, boringssl))] {
-        use ffi::{DSA_SIG_set0, DSA_SIG_get0};
+        use ffi_10_55::{DSA_SIG_set0, DSA_SIG_get0};
     } else {
         #[allow(bad_style)]
         unsafe fn DSA_SIG_set0(
-            sig: *mut ffi::DSA_SIG,
-            r: *mut ffi::BIGNUM,
-            s: *mut ffi::BIGNUM,
+            sig: *mut ffi_10_55::DSA_SIG,
+            r: *mut ffi_10_55::BIGNUM,
+            s: *mut ffi_10_55::BIGNUM,
         ) -> c_int {
             if r.is_null() || s.is_null() {
                 return 0;
             }
-            ffi::BN_clear_free((*sig).r);
-            ffi::BN_clear_free((*sig).s);
+            ffi_10_55::BN_clear_free((*sig).r);
+            ffi_10_55::BN_clear_free((*sig).s);
             (*sig).r = r;
             (*sig).s = s;
             1
@@ -515,9 +515,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DSA_SIG_get0(
-            sig: *const ffi::DSA_SIG,
-            pr: *mut *const ffi::BIGNUM,
-            ps: *mut *const ffi::BIGNUM)
+            sig: *const ffi_10_55::DSA_SIG,
+            pr: *mut *const ffi_10_55::BIGNUM,
+            ps: *mut *const ffi_10_55::BIGNUM)
         {
             if !pr.is_null() {
                 (*pr) = (*sig).r;

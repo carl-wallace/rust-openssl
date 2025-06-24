@@ -65,7 +65,7 @@ use openssl_macros::corresponds;
 pub fn eq(a: &[u8], b: &[u8]) -> bool {
     assert!(a.len() == b.len());
     let ret = unsafe {
-        ffi::CRYPTO_memcmp(
+        ffi_10_55::CRYPTO_memcmp(
             a.as_ptr() as *const _,
             b.as_ptr() as *const _,
             a.len() as size_t,

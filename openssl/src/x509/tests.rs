@@ -631,7 +631,7 @@ fn test_verify_cert_with_wrong_purpose_fails() {
 
     let store = store_bldr.build();
 
-    let expected_error = ffi::X509_V_ERR_INVALID_PURPOSE;
+    let expected_error = ffi_10_55::X509_V_ERR_INVALID_PURPOSE;
     let mut context = X509StoreContext::new().unwrap();
     assert_eq!(
         context
@@ -728,7 +728,7 @@ fn test_crl_entry_extensions() {
     #[cfg(ossl110)]
     assert_eq!(
         CrlReason::KEY_COMPROMISE,
-        CrlReason::from_raw(reason_code.get_i64().unwrap() as ffi::c_int)
+        CrlReason::from_raw(reason_code.get_i64().unwrap() as ffi_10_55::c_int)
     );
 }
 
@@ -1030,7 +1030,7 @@ fn test_set_purpose_fails_verification() {
     store_bldr.set_param(&verify_params).unwrap();
     let store = store_bldr.build();
 
-    let expected_error = ffi::X509_V_ERR_INVALID_PURPOSE;
+    let expected_error = ffi_10_55::X509_V_ERR_INVALID_PURPOSE;
     let mut context = X509StoreContext::new().unwrap();
     assert_eq!(
         context

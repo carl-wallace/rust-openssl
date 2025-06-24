@@ -70,7 +70,7 @@ pub enum Mode {
 ///
 /// [`EVP_EncryptInit`]: https://www.openssl.org/docs/manmaster/crypto/EVP_EncryptInit.html
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub struct Cipher(*const ffi::EVP_CIPHER);
+pub struct Cipher(*const ffi_10_55::EVP_CIPHER);
 
 impl Cipher {
     /// Looks up the cipher for a certain nid.
@@ -79,7 +79,7 @@ impl Cipher {
     ///
     /// [`EVP_get_cipherbynid`]: https://www.openssl.org/docs/manmaster/crypto/EVP_get_cipherbyname.html
     pub fn from_nid(nid: Nid) -> Option<Cipher> {
-        let ptr = unsafe { ffi::EVP_get_cipherbyname(ffi::OBJ_nid2sn(nid.as_raw())) };
+        let ptr = unsafe { ffi_10_55::EVP_get_cipherbyname(ffi_10_55::OBJ_nid2sn(nid.as_raw())) };
         if ptr.is_null() {
             None
         } else {
@@ -93,256 +93,256 @@ impl Cipher {
     ///
     /// [`EVP_CIPHER_nid`]: https://www.openssl.org/docs/manmaster/crypto/EVP_CIPHER_nid.html
     pub fn nid(&self) -> Nid {
-        let nid = unsafe { ffi::EVP_CIPHER_nid(self.0) };
+        let nid = unsafe { ffi_10_55::EVP_CIPHER_nid(self.0) };
         Nid::from_raw(nid)
     }
 
     pub fn aes_128_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_ecb()) }
     }
 
     pub fn aes_128_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_cbc()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_xts() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_xts()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_xts()) }
     }
 
     pub fn aes_128_ctr() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_ctr()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_ctr()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_cfb1() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_cfb1()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_cfb1()) }
     }
 
     pub fn aes_128_cfb128() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_cfb128()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_cfb128()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_cfb8() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_cfb8()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_cfb8()) }
     }
 
     pub fn aes_128_gcm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_gcm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_gcm()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_ccm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_ccm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_ccm()) }
     }
 
     pub fn aes_128_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_ofb()) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_OCB")))]
     pub fn aes_128_ocb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_128_ocb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_128_ocb()) }
     }
 
     pub fn aes_192_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_ecb()) }
     }
 
     pub fn aes_192_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_cbc()) }
     }
 
     pub fn aes_192_ctr() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_ctr()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_ctr()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_cfb1() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_cfb1()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_cfb1()) }
     }
 
     pub fn aes_192_cfb128() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_cfb128()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_cfb128()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_cfb8() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_cfb8()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_cfb8()) }
     }
 
     pub fn aes_192_gcm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_gcm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_gcm()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_ccm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_ccm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_ccm()) }
     }
 
     pub fn aes_192_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_ofb()) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_OCB")))]
     pub fn aes_192_ocb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_192_ocb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_192_ocb()) }
     }
 
     pub fn aes_256_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_ecb()) }
     }
 
     pub fn aes_256_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_cbc()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_xts() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_xts()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_xts()) }
     }
 
     pub fn aes_256_ctr() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_ctr()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_ctr()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_cfb1() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_cfb1()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_cfb1()) }
     }
 
     pub fn aes_256_cfb128() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_cfb128()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_cfb128()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_cfb8() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_cfb8()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_cfb8()) }
     }
 
     pub fn aes_256_gcm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_gcm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_gcm()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_ccm() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_ccm()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_ccm()) }
     }
 
     pub fn aes_256_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_ofb()) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_OCB")))]
     pub fn aes_256_ocb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_aes_256_ocb()) }
+        unsafe { Cipher(ffi_10_55::EVP_aes_256_ocb()) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     pub fn bf_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_bf_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_bf_cbc()) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     pub fn bf_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_bf_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_bf_ecb()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_BF")))]
     pub fn bf_cfb64() -> Cipher {
-        unsafe { Cipher(ffi::EVP_bf_cfb64()) }
+        unsafe { Cipher(ffi_10_55::EVP_bf_cfb64()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_BF")))]
     pub fn bf_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_bf_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_bf_ofb()) }
     }
 
     pub fn des_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_des_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_des_cbc()) }
     }
 
     pub fn des_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_des_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_des_ecb()) }
     }
 
     pub fn des_ede3() -> Cipher {
-        unsafe { Cipher(ffi::EVP_des_ede3()) }
+        unsafe { Cipher(ffi_10_55::EVP_des_ede3()) }
     }
 
     pub fn des_ede3_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_des_ede3_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_des_ede3_cbc()) }
     }
 
     #[cfg(not(boringssl))]
     pub fn des_ede3_cfb64() -> Cipher {
-        unsafe { Cipher(ffi::EVP_des_ede3_cfb64()) }
+        unsafe { Cipher(ffi_10_55::EVP_des_ede3_cfb64()) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_RC4"))]
     pub fn rc4() -> Cipher {
-        unsafe { Cipher(ffi::EVP_rc4()) }
+        unsafe { Cipher(ffi_10_55::EVP_rc4()) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_CHACHA")))]
     pub fn chacha20() -> Cipher {
-        unsafe { Cipher(ffi::EVP_chacha20()) }
+        unsafe { Cipher(ffi_10_55::EVP_chacha20()) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_CHACHA")))]
     pub fn chacha20_poly1305() -> Cipher {
-        unsafe { Cipher(ffi::EVP_chacha20_poly1305()) }
+        unsafe { Cipher(ffi_10_55::EVP_chacha20_poly1305()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_SEED")))]
     pub fn seed_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_seed_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_seed_cbc()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_SEED")))]
     pub fn seed_cfb128() -> Cipher {
-        unsafe { Cipher(ffi::EVP_seed_cfb128()) }
+        unsafe { Cipher(ffi_10_55::EVP_seed_cfb128()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_SEED")))]
     pub fn seed_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_seed_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_seed_ecb()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_SEED")))]
     pub fn seed_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_seed_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_seed_ofb()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ecb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_sm4_ecb()) }
+        unsafe { Cipher(ffi_10_55::EVP_sm4_ecb()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_cbc() -> Cipher {
-        unsafe { Cipher(ffi::EVP_sm4_cbc()) }
+        unsafe { Cipher(ffi_10_55::EVP_sm4_cbc()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ctr() -> Cipher {
-        unsafe { Cipher(ffi::EVP_sm4_ctr()) }
+        unsafe { Cipher(ffi_10_55::EVP_sm4_ctr()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_cfb128() -> Cipher {
-        unsafe { Cipher(ffi::EVP_sm4_cfb128()) }
+        unsafe { Cipher(ffi_10_55::EVP_sm4_cfb128()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ofb() -> Cipher {
-        unsafe { Cipher(ffi::EVP_sm4_ofb()) }
+        unsafe { Cipher(ffi_10_55::EVP_sm4_ofb()) }
     }
 
     /// Creates a `Cipher` from a raw pointer to its OpenSSL type.
@@ -350,12 +350,12 @@ impl Cipher {
     /// # Safety
     ///
     /// The caller must ensure the pointer is valid for the `'static` lifetime.
-    pub unsafe fn from_ptr(ptr: *const ffi::EVP_CIPHER) -> Cipher {
+    pub unsafe fn from_ptr(ptr: *const ffi_10_55::EVP_CIPHER) -> Cipher {
         Cipher(ptr)
     }
 
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    pub fn as_ptr(&self) -> *const ffi::EVP_CIPHER {
+    pub fn as_ptr(&self) -> *const ffi_10_55::EVP_CIPHER {
         self.0
     }
 
@@ -777,22 +777,22 @@ pub fn decrypt_aead(
 
 cfg_if! {
     if #[cfg(any(boringssl, ossl110, libressl273))] {
-        use ffi::{EVP_CIPHER_block_size, EVP_CIPHER_iv_length, EVP_CIPHER_key_length};
+        use ffi_10_55::{EVP_CIPHER_block_size, EVP_CIPHER_iv_length, EVP_CIPHER_key_length};
     } else {
         use crate::LenType;
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_iv_length(ptr: *const ffi::EVP_CIPHER) -> LenType {
+        pub unsafe fn EVP_CIPHER_iv_length(ptr: *const ffi_10_55::EVP_CIPHER) -> LenType {
             (*ptr).iv_len
         }
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_block_size(ptr: *const ffi::EVP_CIPHER) -> LenType {
+        pub unsafe fn EVP_CIPHER_block_size(ptr: *const ffi_10_55::EVP_CIPHER) -> LenType {
             (*ptr).block_size
         }
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_key_length(ptr: *const ffi::EVP_CIPHER) -> LenType {
+        pub unsafe fn EVP_CIPHER_key_length(ptr: *const ffi_10_55::EVP_CIPHER) -> LenType {
             (*ptr).key_len
         }
     }

@@ -45,8 +45,8 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_GENERALIZEDTIME;
-    fn drop = ffi::ASN1_GENERALIZEDTIME_free;
+    type CType = ffi_10_55::ASN1_GENERALIZEDTIME;
+    fn drop = ffi_10_55::ASN1_GENERALIZEDTIME_free;
 
     /// Non-UTC representation of time
     ///
@@ -73,7 +73,7 @@ impl fmt::Display for Asn1GeneralizedTimeRef {
                 Err(_) => return f.write_str("error"),
                 Ok(m) => m,
             };
-            let print_result = cvt(ffi::ASN1_GENERALIZEDTIME_print(
+            let print_result = cvt(ffi_10_55::ASN1_GENERALIZEDTIME_print(
                 mem_bio.as_ptr(),
                 self.as_ptr(),
             ));
@@ -91,61 +91,61 @@ pub struct Asn1Type(c_int);
 
 #[allow(missing_docs)] // no need to document the constants
 impl Asn1Type {
-    pub const EOC: Asn1Type = Asn1Type(ffi::V_ASN1_EOC);
+    pub const EOC: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_EOC);
 
-    pub const BOOLEAN: Asn1Type = Asn1Type(ffi::V_ASN1_BOOLEAN);
+    pub const BOOLEAN: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_BOOLEAN);
 
-    pub const INTEGER: Asn1Type = Asn1Type(ffi::V_ASN1_INTEGER);
+    pub const INTEGER: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_INTEGER);
 
-    pub const BIT_STRING: Asn1Type = Asn1Type(ffi::V_ASN1_BIT_STRING);
+    pub const BIT_STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_BIT_STRING);
 
-    pub const OCTET_STRING: Asn1Type = Asn1Type(ffi::V_ASN1_OCTET_STRING);
+    pub const OCTET_STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_OCTET_STRING);
 
-    pub const NULL: Asn1Type = Asn1Type(ffi::V_ASN1_NULL);
+    pub const NULL: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_NULL);
 
-    pub const OBJECT: Asn1Type = Asn1Type(ffi::V_ASN1_OBJECT);
+    pub const OBJECT: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_OBJECT);
 
-    pub const OBJECT_DESCRIPTOR: Asn1Type = Asn1Type(ffi::V_ASN1_OBJECT_DESCRIPTOR);
+    pub const OBJECT_DESCRIPTOR: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_OBJECT_DESCRIPTOR);
 
-    pub const EXTERNAL: Asn1Type = Asn1Type(ffi::V_ASN1_EXTERNAL);
+    pub const EXTERNAL: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_EXTERNAL);
 
-    pub const REAL: Asn1Type = Asn1Type(ffi::V_ASN1_REAL);
+    pub const REAL: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_REAL);
 
-    pub const ENUMERATED: Asn1Type = Asn1Type(ffi::V_ASN1_ENUMERATED);
+    pub const ENUMERATED: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_ENUMERATED);
 
-    pub const UTF8STRING: Asn1Type = Asn1Type(ffi::V_ASN1_UTF8STRING);
+    pub const UTF8STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_UTF8STRING);
 
-    pub const SEQUENCE: Asn1Type = Asn1Type(ffi::V_ASN1_SEQUENCE);
+    pub const SEQUENCE: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_SEQUENCE);
 
-    pub const SET: Asn1Type = Asn1Type(ffi::V_ASN1_SET);
+    pub const SET: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_SET);
 
-    pub const NUMERICSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_NUMERICSTRING);
+    pub const NUMERICSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_NUMERICSTRING);
 
-    pub const PRINTABLESTRING: Asn1Type = Asn1Type(ffi::V_ASN1_PRINTABLESTRING);
+    pub const PRINTABLESTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_PRINTABLESTRING);
 
-    pub const T61STRING: Asn1Type = Asn1Type(ffi::V_ASN1_T61STRING);
+    pub const T61STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_T61STRING);
 
-    pub const TELETEXSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_TELETEXSTRING);
+    pub const TELETEXSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_TELETEXSTRING);
 
-    pub const VIDEOTEXSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_VIDEOTEXSTRING);
+    pub const VIDEOTEXSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_VIDEOTEXSTRING);
 
-    pub const IA5STRING: Asn1Type = Asn1Type(ffi::V_ASN1_IA5STRING);
+    pub const IA5STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_IA5STRING);
 
-    pub const UTCTIME: Asn1Type = Asn1Type(ffi::V_ASN1_UTCTIME);
+    pub const UTCTIME: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_UTCTIME);
 
-    pub const GENERALIZEDTIME: Asn1Type = Asn1Type(ffi::V_ASN1_GENERALIZEDTIME);
+    pub const GENERALIZEDTIME: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_GENERALIZEDTIME);
 
-    pub const GRAPHICSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_GRAPHICSTRING);
+    pub const GRAPHICSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_GRAPHICSTRING);
 
-    pub const ISO64STRING: Asn1Type = Asn1Type(ffi::V_ASN1_ISO64STRING);
+    pub const ISO64STRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_ISO64STRING);
 
-    pub const VISIBLESTRING: Asn1Type = Asn1Type(ffi::V_ASN1_VISIBLESTRING);
+    pub const VISIBLESTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_VISIBLESTRING);
 
-    pub const GENERALSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_GENERALSTRING);
+    pub const GENERALSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_GENERALSTRING);
 
-    pub const UNIVERSALSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_UNIVERSALSTRING);
+    pub const UNIVERSALSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_UNIVERSALSTRING);
 
-    pub const BMPSTRING: Asn1Type = Asn1Type(ffi::V_ASN1_BMPSTRING);
+    pub const BMPSTRING: Asn1Type = Asn1Type(ffi_10_55::V_ASN1_BMPSTRING);
 
     /// Constructs an `Asn1Type` from a raw OpenSSL value.
     pub fn from_raw(value: c_int) -> Self {
@@ -177,8 +177,8 @@ pub struct TimeDiff {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_TIME;
-    fn drop = ffi::ASN1_TIME_free;
+    type CType = ffi_10_55::ASN1_TIME;
+    fn drop = ffi_10_55::ASN1_TIME_free;
     /// Time storage and comparison
     ///
     /// Asn1Time should be used to store and share time information
@@ -205,7 +205,7 @@ impl Asn1TimeRef {
         let mut secs = 0;
         let other = compare.as_ptr();
 
-        let err = unsafe { ffi::ASN1_TIME_diff(&mut days, &mut secs, self.as_ptr(), other) };
+        let err = unsafe { ffi_10_55::ASN1_TIME_diff(&mut days, &mut secs, self.as_ptr(), other) };
 
         match err {
             0 => Err(ErrorStack::get()),
@@ -284,7 +284,7 @@ impl fmt::Display for Asn1TimeRef {
                 Err(_) => return f.write_str("error"),
                 Ok(m) => m,
             };
-            let print_result = cvt(ffi::ASN1_TIME_print(mem_bio.as_ptr(), self.as_ptr()));
+            let print_result = cvt(ffi_10_55::ASN1_TIME_print(mem_bio.as_ptr(), self.as_ptr()));
             match print_result {
                 Err(_) => f.write_str("error"),
                 Ok(_) => f.write_str(str::from_utf8_unchecked(mem_bio.get_buf())),
@@ -302,20 +302,20 @@ impl fmt::Debug for Asn1TimeRef {
 impl Asn1Time {
     #[corresponds(ASN1_TIME_new)]
     fn new() -> Result<Asn1Time, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         unsafe {
-            let handle = cvt_p(ffi::ASN1_TIME_new())?;
+            let handle = cvt_p(ffi_10_55::ASN1_TIME_new())?;
             Ok(Asn1Time::from_ptr(handle))
         }
     }
 
     #[corresponds(X509_gmtime_adj)]
     fn from_period(period: c_long) -> Result<Asn1Time, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         unsafe {
-            let handle = cvt_p(ffi::X509_gmtime_adj(ptr::null_mut(), period))?;
+            let handle = cvt_p(ffi_10_55::X509_gmtime_adj(ptr::null_mut(), period))?;
             Ok(Asn1Time::from_ptr(handle))
         }
     }
@@ -328,10 +328,10 @@ impl Asn1Time {
     /// Creates a new time from the specified `time_t` value
     #[corresponds(ASN1_TIME_set)]
     pub fn from_unix(time: time_t) -> Result<Asn1Time, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         unsafe {
-            let handle = cvt_p(ffi::ASN1_TIME_set(ptr::null_mut(), time))?;
+            let handle = cvt_p(ffi_10_55::ASN1_TIME_set(ptr::null_mut(), time))?;
             Ok(Asn1Time::from_ptr(handle))
         }
     }
@@ -344,7 +344,7 @@ impl Asn1Time {
             let s = CString::new(s).unwrap();
 
             let time = Asn1Time::new()?;
-            cvt(ffi::ASN1_TIME_set_string(time.as_ptr(), s.as_ptr()))?;
+            cvt(ffi_10_55::ASN1_TIME_set_string(time.as_ptr(), s.as_ptr()))?;
 
             Ok(time)
         }
@@ -360,7 +360,7 @@ impl Asn1Time {
             let s = CString::new(s).unwrap();
 
             let time = Asn1Time::new()?;
-            cvt(ffi::ASN1_TIME_set_string_X509(time.as_ptr(), s.as_ptr()))?;
+            cvt(ffi_10_55::ASN1_TIME_set_string_X509(time.as_ptr(), s.as_ptr()))?;
 
             Ok(time)
         }
@@ -416,8 +416,8 @@ impl<'a> PartialOrd<&'a Asn1TimeRef> for Asn1Time {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_STRING;
-    fn drop = ffi::ASN1_STRING_free;
+    type CType = ffi_10_55::ASN1_STRING;
+    fn drop = ffi_10_55::ASN1_STRING_free;
     /// Primary ASN.1 type used by OpenSSL
     ///
     /// Almost all ASN.1 types in OpenSSL are represented by ASN1_STRING
@@ -440,7 +440,7 @@ impl Asn1StringRef {
     pub fn as_utf8(&self) -> Result<OpensslString, ErrorStack> {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let len = ffi::ASN1_STRING_to_UTF8(&mut ptr, self.as_ptr());
+            let len = ffi_10_55::ASN1_STRING_to_UTF8(&mut ptr, self.as_ptr());
             if len < 0 {
                 return Err(ErrorStack::get());
             }
@@ -463,7 +463,7 @@ impl Asn1StringRef {
     /// Returns the number of bytes in the string.
     #[corresponds(ASN1_STRING_length)]
     pub fn len(&self) -> usize {
-        unsafe { ffi::ASN1_STRING_length(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::ASN1_STRING_length(self.as_ptr()) as usize }
     }
 
     /// Determines if the string is empty.
@@ -482,8 +482,8 @@ impl fmt::Debug for Asn1StringRef {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_INTEGER;
-    fn drop = ffi::ASN1_INTEGER_free;
+    type CType = ffi_10_55::ASN1_INTEGER;
+    fn drop = ffi_10_55::ASN1_INTEGER_free;
 
     /// Numeric representation
     ///
@@ -533,14 +533,14 @@ impl Asn1IntegerRef {
     #[allow(missing_docs, clippy::unnecessary_cast)]
     #[deprecated(since = "0.10.6", note = "use to_bn instead")]
     pub fn get(&self) -> i64 {
-        unsafe { ffi::ASN1_INTEGER_get(self.as_ptr()) as i64 }
+        unsafe { ffi_10_55::ASN1_INTEGER_get(self.as_ptr()) as i64 }
     }
 
     /// Converts the integer to a `BigNum`.
     #[corresponds(ASN1_INTEGER_to_BN)]
     pub fn to_bn(&self) -> Result<BigNum, ErrorStack> {
         unsafe {
-            cvt_p(ffi::ASN1_INTEGER_to_BN(self.as_ptr(), ptr::null_mut()))
+            cvt_p(ffi_10_55::ASN1_INTEGER_to_BN(self.as_ptr(), ptr::null_mut()))
                 .map(|p| BigNum::from_ptr(p))
         }
     }
@@ -551,19 +551,19 @@ impl Asn1IntegerRef {
     /// [`bn`]: ../bn/struct.BigNumRef.html#method.to_asn1_integer
     #[corresponds(ASN1_INTEGER_set)]
     pub fn set(&mut self, value: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::ASN1_INTEGER_set(self.as_ptr(), value as c_long)).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::ASN1_INTEGER_set(self.as_ptr(), value as c_long)).map(|_| ()) }
     }
 
     /// Creates a new Asn1Integer with the same value.
     #[corresponds(ASN1_INTEGER_dup)]
     pub fn to_owned(&self) -> Result<Asn1Integer, ErrorStack> {
-        unsafe { cvt_p(ffi::ASN1_INTEGER_dup(self.as_ptr())).map(|p| Asn1Integer::from_ptr(p)) }
+        unsafe { cvt_p(ffi_10_55::ASN1_INTEGER_dup(self.as_ptr())).map(|p| Asn1Integer::from_ptr(p)) }
     }
 }
 
 impl Ord for Asn1IntegerRef {
     fn cmp(&self, other: &Self) -> Ordering {
-        let res = unsafe { ffi::ASN1_INTEGER_cmp(self.as_ptr(), other.as_ptr()) };
+        let res = unsafe { ffi_10_55::ASN1_INTEGER_cmp(self.as_ptr(), other.as_ptr()) };
         res.cmp(&0)
     }
 }
@@ -580,8 +580,8 @@ impl PartialEq for Asn1IntegerRef {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_BIT_STRING;
-    fn drop = ffi::ASN1_BIT_STRING_free;
+    type CType = ffi_10_55::ASN1_BIT_STRING;
+    fn drop = ffi_10_55::ASN1_BIT_STRING_free;
     /// Sequence of bytes
     ///
     /// Asn1BitString is used in [`x509`] certificates for the signature.
@@ -603,7 +603,7 @@ impl Asn1BitStringRef {
     /// Returns the number of bytes in the string.
     #[corresponds(ASN1_STRING_length)]
     pub fn len(&self) -> usize {
-        unsafe { ffi::ASN1_STRING_length(self.as_ptr() as *const _) as usize }
+        unsafe { ffi_10_55::ASN1_STRING_length(self.as_ptr() as *const _) as usize }
     }
 
     /// Determines if the string is empty.
@@ -613,8 +613,8 @@ impl Asn1BitStringRef {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_OCTET_STRING;
-    fn drop = ffi::ASN1_OCTET_STRING_free;
+    type CType = ffi_10_55::ASN1_OCTET_STRING;
+    fn drop = ffi_10_55::ASN1_OCTET_STRING_free;
     /// ASN.1 OCTET STRING type
     pub struct Asn1OctetString;
     /// A reference to an [`Asn1OctetString`].
@@ -624,10 +624,10 @@ foreign_type_and_impl_send_sync! {
 impl Asn1OctetString {
     /// Creates an Asn1OctetString from bytes
     pub fn new_from_bytes(value: &[u8]) -> Result<Self, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
         unsafe {
-            let s = cvt_p(ffi::ASN1_OCTET_STRING_new())?;
-            ffi::ASN1_OCTET_STRING_set(s, value.as_ptr(), value.len().try_into().unwrap());
+            let s = cvt_p(ffi_10_55::ASN1_OCTET_STRING_new())?;
+            ffi_10_55::ASN1_OCTET_STRING_set(s, value.as_ptr(), value.len().try_into().unwrap());
             Ok(Self::from_ptr(s))
         }
     }
@@ -643,7 +643,7 @@ impl Asn1OctetStringRef {
     /// Returns the number of bytes in the octet string.
     #[corresponds(ASN1_STRING_length)]
     pub fn len(&self) -> usize {
-        unsafe { ffi::ASN1_STRING_length(self.as_ptr().cast()) as usize }
+        unsafe { ffi_10_55::ASN1_STRING_length(self.as_ptr().cast()) as usize }
     }
 
     /// Determines if the string is empty.
@@ -653,9 +653,9 @@ impl Asn1OctetStringRef {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_OBJECT;
-    fn drop = ffi::ASN1_OBJECT_free;
-    fn clone = ffi::OBJ_dup;
+    type CType = ffi_10_55::ASN1_OBJECT;
+    fn drop = ffi_10_55::ASN1_OBJECT_free;
+    fn clone = ffi_10_55::OBJ_dup;
 
     /// Object Identifier
     ///
@@ -676,7 +676,7 @@ foreign_type_and_impl_send_sync! {
 }
 
 impl Stackable for Asn1Object {
-    type StackType = ffi::stack_st_ASN1_OBJECT;
+    type StackType = ffi_10_55::stack_st_ASN1_OBJECT;
 }
 
 impl Asn1Object {
@@ -685,9 +685,9 @@ impl Asn1Object {
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(txt: &str) -> Result<Asn1Object, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let txt = CString::new(txt).unwrap();
-            let obj: *mut ffi::ASN1_OBJECT = cvt_p(ffi::OBJ_txt2obj(txt.as_ptr() as *const _, 0))?;
+            let obj: *mut ffi_10_55::ASN1_OBJECT = cvt_p(ffi_10_55::OBJ_txt2obj(txt.as_ptr() as *const _, 0))?;
             Ok(Asn1Object::from_ptr(obj))
         }
     }
@@ -700,8 +700,8 @@ impl Asn1Object {
     #[cfg(ossl111)]
     pub fn as_slice(&self) -> &[u8] {
         unsafe {
-            let len = ffi::OBJ_length(self.as_ptr());
-            slice::from_raw_parts(ffi::OBJ_get0_data(self.as_ptr()), len)
+            let len = ffi_10_55::OBJ_length(self.as_ptr());
+            slice::from_raw_parts(ffi_10_55::OBJ_get0_data(self.as_ptr()), len)
         }
     }
 }
@@ -709,7 +709,7 @@ impl Asn1Object {
 impl Asn1ObjectRef {
     /// Returns the NID associated with this OID.
     pub fn nid(&self) -> Nid {
-        unsafe { Nid::from_raw(ffi::OBJ_obj2nid(self.as_ptr())) }
+        unsafe { Nid::from_raw(ffi_10_55::OBJ_obj2nid(self.as_ptr())) }
     }
 }
 
@@ -717,7 +717,7 @@ impl fmt::Display for Asn1ObjectRef {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         unsafe {
             let mut buf = [0; 80];
-            let len = ffi::OBJ_obj2txt(
+            let len = ffi_10_55::OBJ_obj2txt(
                 buf.as_mut_ptr() as *mut _,
                 buf.len() as c_int,
                 self.as_ptr(),
@@ -739,18 +739,18 @@ impl fmt::Debug for Asn1ObjectRef {
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl273, boringssl))] {
-        use ffi::ASN1_STRING_get0_data;
+        use ffi_10_55::ASN1_STRING_get0_data;
     } else {
         #[allow(bad_style)]
-        unsafe fn ASN1_STRING_get0_data(s: *mut ffi::ASN1_STRING) -> *const ::libc::c_uchar {
-            ffi::ASN1_STRING_data(s)
+        unsafe fn ASN1_STRING_get0_data(s: *mut ffi_10_55::ASN1_STRING) -> *const ::libc::c_uchar {
+            ffi_10_55::ASN1_STRING_data(s)
         }
     }
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ASN1_ENUMERATED;
-    fn drop = ffi::ASN1_ENUMERATED_free;
+    type CType = ffi_10_55::ASN1_ENUMERATED;
+    fn drop = ffi_10_55::ASN1_ENUMERATED_free;
 
     /// An ASN.1 enumerated.
     pub struct Asn1Enumerated;
@@ -765,7 +765,7 @@ impl Asn1EnumeratedRef {
     pub fn get_i64(&self) -> Result<i64, ErrorStack> {
         let mut crl_reason = 0;
         unsafe {
-            cvt(ffi::ASN1_ENUMERATED_get_int64(
+            cvt(ffi_10_55::ASN1_ENUMERATED_get_int64(
                 &mut crl_reason,
                 self.as_ptr(),
             ))?;

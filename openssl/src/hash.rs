@@ -44,15 +44,15 @@ use crate::{cvt, cvt_p};
 
 cfg_if! {
     if #[cfg(any(ossl110, boringssl))] {
-        use ffi::{EVP_MD_CTX_free, EVP_MD_CTX_new};
+        use ffi_10_55::{EVP_MD_CTX_free, EVP_MD_CTX_new};
     } else {
-        use ffi::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
+        use ffi_10_55::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
     }
 }
 
 /// A message digest algorithm.
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub struct MessageDigest(*const ffi::EVP_MD);
+pub struct MessageDigest(*const ffi_10_55::EVP_MD);
 
 impl MessageDigest {
     /// Creates a `MessageDigest` from a raw OpenSSL pointer.
@@ -60,7 +60,7 @@ impl MessageDigest {
     /// # Safety
     ///
     /// The caller must ensure the pointer is valid.
-    pub unsafe fn from_ptr(x: *const ffi::EVP_MD) -> Self {
+    pub unsafe fn from_ptr(x: *const ffi_10_55::EVP_MD) -> Self {
         MessageDigest(x)
     }
 
@@ -71,7 +71,7 @@ impl MessageDigest {
     /// [`EVP_get_digestbynid`]: https://www.openssl.org/docs/manmaster/crypto/EVP_DigestInit.html
     pub fn from_nid(type_: Nid) -> Option<MessageDigest> {
         unsafe {
-            let ptr = ffi::EVP_get_digestbynid(type_.as_raw());
+            let ptr = ffi_10_55::EVP_get_digestbynid(type_.as_raw());
             if ptr.is_null() {
                 None
             } else {
@@ -86,10 +86,10 @@ impl MessageDigest {
     ///
     /// [`EVP_get_digestbyname`]: https://www.openssl.org/docs/manmaster/crypto/EVP_DigestInit.html
     pub fn from_name(name: &str) -> Option<MessageDigest> {
-        ffi::init();
+        ffi_10_55::init();
         let name = CString::new(name).ok()?;
         unsafe {
-            let ptr = ffi::EVP_get_digestbyname(name.as_ptr());
+            let ptr = ffi_10_55::EVP_get_digestbyname(name.as_ptr());
             if ptr.is_null() {
                 None
             } else {
@@ -100,94 +100,94 @@ impl MessageDigest {
 
     #[cfg(not(boringssl))]
     pub fn null() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_md_null()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_md_null()) }
     }
 
     pub fn md5() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_md5()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_md5()) }
     }
 
     pub fn sha1() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha1()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha1()) }
     }
 
     pub fn sha224() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha224()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha224()) }
     }
 
     pub fn sha256() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha256()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha256()) }
     }
 
     pub fn sha384() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha384()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha384()) }
     }
 
     pub fn sha512() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha512()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha512()) }
     }
 
     #[cfg(ossl111)]
     pub fn sha3_224() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha3_224()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha3_224()) }
     }
 
     #[cfg(ossl111)]
     pub fn sha3_256() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha3_256()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha3_256()) }
     }
 
     #[cfg(ossl111)]
     pub fn sha3_384() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha3_384()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha3_384()) }
     }
 
     #[cfg(ossl111)]
     pub fn sha3_512() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sha3_512()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sha3_512()) }
     }
 
     #[cfg(ossl111)]
     pub fn shake_128() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_shake128()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_shake128()) }
     }
 
     #[cfg(ossl111)]
     pub fn shake_256() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_shake256()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_shake256()) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_RMD160")))]
     pub fn ripemd160() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_ripemd160()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_ripemd160()) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM3")))]
     pub fn sm3() -> MessageDigest {
-        unsafe { MessageDigest(ffi::EVP_sm3()) }
+        unsafe { MessageDigest(ffi_10_55::EVP_sm3()) }
     }
 
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    pub fn as_ptr(&self) -> *const ffi::EVP_MD {
+    pub fn as_ptr(&self) -> *const ffi_10_55::EVP_MD {
         self.0
     }
 
     /// The block size of the digest in bytes.
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn block_size(&self) -> usize {
-        unsafe { ffi::EVP_MD_block_size(self.0) as usize }
+        unsafe { ffi_10_55::EVP_MD_block_size(self.0) as usize }
     }
 
     /// The size of the digest in bytes.
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn size(&self) -> usize {
-        unsafe { ffi::EVP_MD_size(self.0) as usize }
+        unsafe { ffi_10_55::EVP_MD_size(self.0) as usize }
     }
 
     /// The name of the digest.
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn type_(&self) -> Nid {
-        Nid::from_raw(unsafe { ffi::EVP_MD_type(self.0) })
+        Nid::from_raw(unsafe { ffi_10_55::EVP_MD_type(self.0) })
     }
 }
 
@@ -232,8 +232,8 @@ use self::State::*;
 /// and provide a `buf` to store the hash. The hash will be as long as
 /// the `buf`.
 pub struct Hasher {
-    ctx: *mut ffi::EVP_MD_CTX,
-    md: *const ffi::EVP_MD,
+    ctx: *mut ffi_10_55::EVP_MD_CTX,
+    md: *const ffi_10_55::EVP_MD,
     type_: MessageDigest,
     state: State,
 }
@@ -244,7 +244,7 @@ unsafe impl Send for Hasher {}
 impl Hasher {
     /// Creates a new `Hasher` with the specified hash type.
     pub fn new(ty: MessageDigest) -> Result<Hasher, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         let ctx = unsafe { cvt_p(EVP_MD_CTX_new())? };
 
@@ -267,7 +267,7 @@ impl Hasher {
             Finalized => (),
         }
         unsafe {
-            cvt(ffi::EVP_DigestInit_ex(self.ctx, self.md, ptr::null_mut()))?;
+            cvt(ffi_10_55::EVP_DigestInit_ex(self.ctx, self.md, ptr::null_mut()))?;
         }
         self.state = Reset;
         Ok(())
@@ -279,7 +279,7 @@ impl Hasher {
             self.init()?;
         }
         unsafe {
-            cvt(ffi::EVP_DigestUpdate(
+            cvt(ffi_10_55::EVP_DigestUpdate(
                 self.ctx,
                 data.as_ptr() as *mut _,
                 data.len(),
@@ -296,11 +296,11 @@ impl Hasher {
         }
         unsafe {
             #[cfg(not(boringssl))]
-            let mut len = ffi::EVP_MAX_MD_SIZE;
+            let mut len = ffi_10_55::EVP_MAX_MD_SIZE;
             #[cfg(boringssl)]
-            let mut len = ffi::EVP_MAX_MD_SIZE as u32;
-            let mut buf = [0; ffi::EVP_MAX_MD_SIZE as usize];
-            cvt(ffi::EVP_DigestFinal_ex(
+            let mut len = ffi_10_55::EVP_MAX_MD_SIZE as u32;
+            let mut buf = [0; ffi_10_55::EVP_MAX_MD_SIZE as usize];
+            cvt(ffi_10_55::EVP_DigestFinal_ex(
                 self.ctx,
                 buf.as_mut_ptr(),
                 &mut len,
@@ -321,7 +321,7 @@ impl Hasher {
             self.init()?;
         }
         unsafe {
-            cvt(ffi::EVP_DigestFinalXOF(
+            cvt(ffi_10_55::EVP_DigestFinalXOF(
                 self.ctx,
                 buf.as_mut_ptr(),
                 buf.len(),
@@ -349,7 +349,7 @@ impl Clone for Hasher {
         let ctx = unsafe {
             let ctx = EVP_MD_CTX_new();
             assert!(!ctx.is_null());
-            let r = ffi::EVP_MD_CTX_copy_ex(ctx, self.ctx);
+            let r = ffi_10_55::EVP_MD_CTX_copy_ex(ctx, self.ctx);
             assert_eq!(r, 1);
             ctx
         };
@@ -379,7 +379,7 @@ impl Drop for Hasher {
 /// store the digest data.
 #[derive(Copy)]
 pub struct DigestBytes {
-    pub(crate) buf: [u8; ffi::EVP_MAX_MD_SIZE as usize],
+    pub(crate) buf: [u8; ffi_10_55::EVP_MAX_MD_SIZE as usize],
     pub(crate) len: usize,
 }
 

@@ -31,9 +31,9 @@ use openssl_macros::corresponds;
 #[corresponds(RAND_bytes)]
 pub fn rand_bytes(buf: &mut [u8]) -> Result<(), ErrorStack> {
     unsafe {
-        ffi::init();
+        ffi_10_55::init();
         assert!(buf.len() <= c_int::max_value() as usize);
-        cvt(ffi::RAND_bytes(buf.as_mut_ptr(), buf.len() as LenType)).map(|_| ())
+        cvt(ffi_10_55::RAND_bytes(buf.as_mut_ptr(), buf.len() as LenType)).map(|_| ())
     }
 }
 
@@ -44,7 +44,7 @@ pub fn rand_bytes(buf: &mut [u8]) -> Result<(), ErrorStack> {
 #[cfg(ossl111)]
 pub fn keep_random_devices_open(keep: bool) {
     unsafe {
-        ffi::RAND_keep_random_devices_open(keep as LenType);
+        ffi_10_55::RAND_keep_random_devices_open(keep as LenType);
     }
 }
 

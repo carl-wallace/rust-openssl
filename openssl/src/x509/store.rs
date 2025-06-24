@@ -60,8 +60,8 @@ use std::ffi::CString;
 use std::path::Path;
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::X509_STORE;
-    fn drop = ffi::X509_STORE_free;
+    type CType = ffi_10_55::X509_STORE;
+    fn drop = ffi_10_55::X509_STORE_free;
 
     /// A builder type used to construct an `X509Store`.
     pub struct X509StoreBuilder;
@@ -76,9 +76,9 @@ impl X509StoreBuilder {
     #[corresponds(X509_STORE_new)]
     pub fn new() -> Result<X509StoreBuilder, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
-            cvt_p(ffi::X509_STORE_new()).map(X509StoreBuilder)
+            cvt_p(ffi_10_55::X509_STORE_new()).map(X509StoreBuilder)
         }
     }
 
@@ -95,7 +95,7 @@ impl X509StoreBuilderRef {
     // FIXME should take an &X509Ref
     #[corresponds(X509_STORE_add_cert)]
     pub fn add_cert(&mut self, cert: X509) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::X509_STORE_add_cert(self.as_ptr(), cert.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::X509_STORE_add_cert(self.as_ptr(), cert.as_ptr())).map(|_| ()) }
     }
 
     /// Load certificates from their default locations.
@@ -105,7 +105,7 @@ impl X509StoreBuilderRef {
     /// build time otherwise.
     #[corresponds(X509_STORE_set_default_paths)]
     pub fn set_default_paths(&mut self) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::X509_STORE_set_default_paths(self.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::X509_STORE_set_default_paths(self.as_ptr())).map(|_| ()) }
     }
 
     /// Adds a lookup method to the store.
@@ -114,7 +114,7 @@ impl X509StoreBuilderRef {
         &mut self,
         method: &'static X509LookupMethodRef<T>,
     ) -> Result<&mut X509LookupRef<T>, ErrorStack> {
-        let lookup = unsafe { ffi::X509_STORE_add_lookup(self.as_ptr(), method.as_ptr()) };
+        let lookup = unsafe { ffi_10_55::X509_STORE_add_lookup(self.as_ptr(), method.as_ptr()) };
         cvt_p(lookup).map(|ptr| unsafe { X509LookupRef::from_ptr_mut(ptr) })
     }
 
@@ -122,27 +122,27 @@ impl X509StoreBuilderRef {
     #[corresponds(X509_STORE_set_flags)]
     #[cfg(any(ossl102, libressl261))]
     pub fn set_flags(&mut self, flags: X509VerifyFlags) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::X509_STORE_set_flags(self.as_ptr(), flags.bits())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::X509_STORE_set_flags(self.as_ptr(), flags.bits())).map(|_| ()) }
     }
 
     /// Sets the certificate purpose.
     /// The purpose value can be obtained by `X509PurposeRef::get_by_sname()`
     #[corresponds(X509_STORE_set_purpose)]
     pub fn set_purpose(&mut self, purpose: X509PurposeId) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::X509_STORE_set_purpose(self.as_ptr(), purpose.as_raw())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::X509_STORE_set_purpose(self.as_ptr(), purpose.as_raw())).map(|_| ()) }
     }
 
     /// Sets certificate chain validation related parameters.
     #[corresponds[X509_STORE_set1_param]]
     #[cfg(any(ossl102, libressl261))]
     pub fn set_param(&mut self, param: &X509VerifyParamRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::X509_STORE_set1_param(self.as_ptr(), param.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::X509_STORE_set1_param(self.as_ptr(), param.as_ptr())).map(|_| ()) }
     }
 }
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::X509_LOOKUP;
-    fn drop = ffi::X509_LOOKUP_free;
+    type CType = ffi_10_55::X509_LOOKUP;
+    fn drop = ffi_10_55::X509_LOOKUP_free;
 
     /// Information used by an `X509Store` to look up certificates and CRLs.
     pub struct X509Lookup<T>;
@@ -163,7 +163,7 @@ impl X509Lookup<HashDir> {
     /// directory.
     #[corresponds(X509_LOOKUP_hash_dir)]
     pub fn hash_dir() -> &'static X509LookupMethodRef<HashDir> {
-        unsafe { X509LookupMethodRef::from_ptr(ffi::X509_LOOKUP_hash_dir()) }
+        unsafe { X509LookupMethodRef::from_ptr(ffi_10_55::X509_LOOKUP_hash_dir()) }
     }
 }
 
@@ -175,7 +175,7 @@ impl X509LookupRef<HashDir> {
     pub fn add_dir(&mut self, name: &str, file_type: SslFiletype) -> Result<(), ErrorStack> {
         let name = CString::new(name).unwrap();
         unsafe {
-            cvt(ffi::X509_LOOKUP_add_dir(
+            cvt(ffi_10_55::X509_LOOKUP_add_dir(
                 self.as_ptr(),
                 name.as_ptr(),
                 file_type.as_raw(),
@@ -195,7 +195,7 @@ impl X509Lookup<File> {
     /// into memory at the time the file is added as a lookup source.
     #[corresponds(X509_LOOKUP_file)]
     pub fn file() -> &'static X509LookupMethodRef<File> {
-        unsafe { X509LookupMethodRef::from_ptr(ffi::X509_LOOKUP_file()) }
+        unsafe { X509LookupMethodRef::from_ptr(ffi_10_55::X509_LOOKUP_file()) }
     }
 }
 
@@ -211,7 +211,7 @@ impl X509LookupRef<File> {
     ) -> Result<(), ErrorStack> {
         let file = CString::new(file.as_ref().as_os_str().to_str().unwrap()).unwrap();
         unsafe {
-            cvt(ffi::X509_load_cert_file(
+            cvt(ffi_10_55::X509_load_cert_file(
                 self.as_ptr(),
                 file.as_ptr(),
                 file_type.as_raw(),
@@ -229,7 +229,7 @@ impl X509LookupRef<File> {
     ) -> Result<i32, ErrorStack> {
         let file = CString::new(file.as_ref().as_os_str().to_str().unwrap()).unwrap();
         unsafe {
-            cvt(ffi::X509_load_crl_file(
+            cvt(ffi_10_55::X509_load_crl_file(
                 self.as_ptr(),
                 file.as_ptr(),
                 file_type.as_raw(),
@@ -239,7 +239,7 @@ impl X509LookupRef<File> {
 }
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::X509_LOOKUP_METHOD;
+    type CType = ffi_10_55::X509_LOOKUP_METHOD;
     fn drop = X509_LOOKUP_meth_free;
 
     /// Method used to look up certificates and CRLs.
@@ -249,8 +249,8 @@ generic_foreign_type_and_impl_send_sync! {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::X509_STORE;
-    fn drop = ffi::X509_STORE_free;
+    type CType = ffi_10_55::X509_STORE;
+    fn drop = ffi_10_55::X509_STORE_free;
 
     /// A certificate store to hold trusted `X509` certificates.
     pub struct X509Store;
@@ -268,10 +268,10 @@ impl X509StoreRef {
 
 cfg_if! {
     if #[cfg(any(boringssl, ossl110, libressl270))] {
-        use ffi::X509_STORE_get0_objects;
+        use ffi_10_55::X509_STORE_get0_objects;
     } else {
         #[allow(bad_style)]
-        unsafe fn X509_STORE_get0_objects(x: *mut ffi::X509_STORE) -> *mut ffi::stack_st_X509_OBJECT {
+        unsafe fn X509_STORE_get0_objects(x: *mut ffi_10_55::X509_STORE) -> *mut ffi_10_55::stack_st_X509_OBJECT {
             (*x).objs
         }
     }
@@ -279,9 +279,9 @@ cfg_if! {
 
 cfg_if! {
     if #[cfg(ossl110)] {
-        use ffi::X509_LOOKUP_meth_free;
+        use ffi_10_55::X509_LOOKUP_meth_free;
     } else {
         #[allow(bad_style)]
-        unsafe fn X509_LOOKUP_meth_free(_x: *mut ffi::X509_LOOKUP_METHOD) {}
+        unsafe fn X509_LOOKUP_meth_free(_x: *mut ffi_10_55::X509_LOOKUP_METHOD) {}
     }
 }

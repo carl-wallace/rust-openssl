@@ -46,10 +46,10 @@ use openssl_macros::corresponds;
 pub struct Padding(c_int);
 
 impl Padding {
-    pub const NONE: Padding = Padding(ffi::RSA_NO_PADDING);
-    pub const PKCS1: Padding = Padding(ffi::RSA_PKCS1_PADDING);
-    pub const PKCS1_OAEP: Padding = Padding(ffi::RSA_PKCS1_OAEP_PADDING);
-    pub const PKCS1_PSS: Padding = Padding(ffi::RSA_PKCS1_PSS_PADDING);
+    pub const NONE: Padding = Padding(ffi_10_55::RSA_NO_PADDING);
+    pub const PKCS1: Padding = Padding(ffi_10_55::RSA_PKCS1_PADDING);
+    pub const PKCS1_OAEP: Padding = Padding(ffi_10_55::RSA_PKCS1_OAEP_PADDING);
+    pub const PKCS1_PSS: Padding = Padding(ffi_10_55::RSA_PKCS1_PSS_PADDING);
 
     /// Creates a `Padding` from an integer representation.
     pub fn from_raw(value: c_int) -> Padding {
@@ -64,8 +64,8 @@ impl Padding {
 }
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::RSA;
-    fn drop = ffi::RSA_free;
+    type CType = ffi_10_55::RSA;
+    fn drop = ffi_10_55::RSA_free;
 
     /// An RSA key.
     pub struct Rsa<T>;
@@ -85,7 +85,7 @@ impl<T> ToOwned for RsaRef<T> {
 
     fn to_owned(&self) -> Rsa<T> {
         unsafe {
-            ffi::RSA_up_ref(self.as_ptr());
+            ffi_10_55::RSA_up_ref(self.as_ptr());
             Rsa::from_ptr(self.as_ptr())
         }
     }
@@ -106,14 +106,14 @@ where
         /// The output will have a header of `-----BEGIN RSA PRIVATE KEY-----`.
         #[corresponds(PEM_write_bio_RSAPrivateKey)]
         private_key_to_pem_passphrase,
-        ffi::PEM_write_bio_RSAPrivateKey
+        ffi_10_55::PEM_write_bio_RSAPrivateKey
     }
 
     to_der! {
         /// Serializes the private key to a DER-encoded PKCS#1 RSAPrivateKey structure.
         #[corresponds(i2d_RSAPrivateKey)]
         private_key_to_der,
-        ffi::i2d_RSAPrivateKey
+        ffi_10_55::i2d_RSAPrivateKey
     }
 
     /// Decrypts data using the private key, returning the number of decrypted bytes.
@@ -133,7 +133,7 @@ where
         assert!(to.len() >= self.size() as usize);
 
         unsafe {
-            let len = cvt_n(ffi::RSA_private_decrypt(
+            let len = cvt_n(ffi_10_55::RSA_private_decrypt(
                 from.len() as LenType,
                 from.as_ptr(),
                 to.as_mut_ptr(),
@@ -161,7 +161,7 @@ where
         assert!(to.len() >= self.size() as usize);
 
         unsafe {
-            let len = cvt_n(ffi::RSA_private_encrypt(
+            let len = cvt_n(ffi_10_55::RSA_private_encrypt(
                 from.len() as LenType,
                 from.as_ptr(),
                 to.as_mut_ptr(),
@@ -237,7 +237,7 @@ where
     #[allow(clippy::unnecessary_cast)]
     pub fn check_key(&self) -> Result<bool, ErrorStack> {
         unsafe {
-            let result = ffi::RSA_check_key(self.as_ptr()) as i32;
+            let result = ffi_10_55::RSA_check_key(self.as_ptr()) as i32;
             if result == -1 {
                 Err(ErrorStack::get())
             } else {
@@ -257,14 +257,14 @@ where
         /// The output will have a header of `-----BEGIN PUBLIC KEY-----`.
         #[corresponds(PEM_write_bio_RSA_PUBKEY)]
         public_key_to_pem,
-        ffi::PEM_write_bio_RSA_PUBKEY
+        ffi_10_55::PEM_write_bio_RSA_PUBKEY
     }
 
     to_der! {
         /// Serializes the public key into a DER-encoded SubjectPublicKeyInfo structure.
         #[corresponds(i2d_RSA_PUBKEY)]
         public_key_to_der,
-        ffi::i2d_RSA_PUBKEY
+        ffi_10_55::i2d_RSA_PUBKEY
     }
 
     to_pem! {
@@ -273,20 +273,20 @@ where
         /// The output will have a header of `-----BEGIN RSA PUBLIC KEY-----`.
         #[corresponds(PEM_write_bio_RSAPublicKey)]
         public_key_to_pem_pkcs1,
-        ffi::PEM_write_bio_RSAPublicKey
+        ffi_10_55::PEM_write_bio_RSAPublicKey
     }
 
     to_der! {
         /// Serializes the public key into a DER-encoded PKCS#1 RSAPublicKey structure.
         #[corresponds(i2d_RSAPublicKey)]
         public_key_to_der_pkcs1,
-        ffi::i2d_RSAPublicKey
+        ffi_10_55::i2d_RSAPublicKey
     }
 
     /// Returns the size of the modulus in bytes.
     #[corresponds(RSA_size)]
     pub fn size(&self) -> u32 {
-        unsafe { ffi::RSA_size(self.as_ptr()) as u32 }
+        unsafe { ffi_10_55::RSA_size(self.as_ptr()) as u32 }
     }
 
     /// Decrypts data using the public key, returning the number of decrypted bytes.
@@ -305,7 +305,7 @@ where
         assert!(to.len() >= self.size() as usize);
 
         unsafe {
-            let len = cvt_n(ffi::RSA_public_decrypt(
+            let len = cvt_n(ffi_10_55::RSA_public_decrypt(
                 from.len() as LenType,
                 from.as_ptr(),
                 to.as_mut_ptr(),
@@ -332,7 +332,7 @@ where
         assert!(to.len() >= self.size() as usize);
 
         unsafe {
-            let len = cvt_n(ffi::RSA_public_encrypt(
+            let len = cvt_n(ffi_10_55::RSA_public_encrypt(
                 from.len() as LenType,
                 from.as_ptr(),
                 to.as_mut_ptr(),
@@ -376,7 +376,7 @@ impl Rsa<Public> {
     /// [`RSA_set0_key`]: https://www.openssl.org/docs/manmaster/crypto/RSA_set0_key.html
     pub fn from_public_components(n: BigNum, e: BigNum) -> Result<Rsa<Public>, ErrorStack> {
         unsafe {
-            let rsa = cvt_p(ffi::RSA_new())?;
+            let rsa = cvt_p(ffi_10_55::RSA_new())?;
             RSA_set0_key(rsa, n.as_ptr(), e.as_ptr(), ptr::null_mut());
             mem::forget((n, e));
             Ok(Rsa::from_ptr(rsa))
@@ -390,7 +390,7 @@ impl Rsa<Public> {
         #[corresponds(PEM_read_bio_RSA_PUBKEY)]
         public_key_from_pem,
         Rsa<Public>,
-        ffi::PEM_read_bio_RSA_PUBKEY
+        ffi_10_55::PEM_read_bio_RSA_PUBKEY
     }
 
     from_pem! {
@@ -400,7 +400,7 @@ impl Rsa<Public> {
         #[corresponds(PEM_read_bio_RSAPublicKey)]
         public_key_from_pem_pkcs1,
         Rsa<Public>,
-        ffi::PEM_read_bio_RSAPublicKey
+        ffi_10_55::PEM_read_bio_RSAPublicKey
     }
 
     from_der! {
@@ -408,7 +408,7 @@ impl Rsa<Public> {
         #[corresponds(d2i_RSA_PUBKEY)]
         public_key_from_der,
         Rsa<Public>,
-        ffi::d2i_RSA_PUBKEY
+        ffi_10_55::d2i_RSA_PUBKEY
     }
 
     from_der! {
@@ -416,7 +416,7 @@ impl Rsa<Public> {
         #[corresponds(d2i_RSAPublicKey)]
         public_key_from_der_pkcs1,
         Rsa<Public>,
-        ffi::d2i_RSAPublicKey
+        ffi_10_55::d2i_RSAPublicKey
     }
 }
 
@@ -436,7 +436,7 @@ impl RsaPrivateKeyBuilder {
     /// [`RSA_set0_key`]: https://www.openssl.org/docs/manmaster/crypto/RSA_set0_key.html
     pub fn new(n: BigNum, e: BigNum, d: BigNum) -> Result<RsaPrivateKeyBuilder, ErrorStack> {
         unsafe {
-            let rsa = cvt_p(ffi::RSA_new())?;
+            let rsa = cvt_p(ffi_10_55::RSA_new())?;
             RSA_set0_key(rsa, n.as_ptr(), e.as_ptr(), d.as_ptr());
             mem::forget((n, e, d));
             Ok(RsaPrivateKeyBuilder {
@@ -525,7 +525,7 @@ impl Rsa<Private> {
     /// The public exponent will be 65537.
     #[corresponds(RSA_generate_key_ex)]
     pub fn generate(bits: u32) -> Result<Rsa<Private>, ErrorStack> {
-        let e = BigNum::from_u32(ffi::RSA_F4 as u32)?;
+        let e = BigNum::from_u32(ffi_10_55::RSA_F4 as u32)?;
         Rsa::generate_with_e(bits, &e)
     }
 
@@ -535,8 +535,8 @@ impl Rsa<Private> {
     #[corresponds(RSA_generate_key_ex)]
     pub fn generate_with_e(bits: u32, e: &BigNumRef) -> Result<Rsa<Private>, ErrorStack> {
         unsafe {
-            let rsa = Rsa::from_ptr(cvt_p(ffi::RSA_new())?);
-            cvt(ffi::RSA_generate_key_ex(
+            let rsa = Rsa::from_ptr(cvt_p(ffi_10_55::RSA_new())?);
+            cvt(ffi_10_55::RSA_generate_key_ex(
                 rsa.0,
                 bits as c_int,
                 e.as_ptr(),
@@ -562,7 +562,7 @@ impl Rsa<Private> {
         #[corresponds(PEM_read_bio_RSAPrivateKey)]
         private_key_from_pem_callback,
         Rsa<Private>,
-        ffi::PEM_read_bio_RSAPrivateKey
+        ffi_10_55::PEM_read_bio_RSAPrivateKey
     }
 
     from_der! {
@@ -570,7 +570,7 @@ impl Rsa<Private> {
         #[corresponds(d2i_RSAPrivateKey)]
         private_key_from_der,
         Rsa<Private>,
-        ffi::d2i_RSAPrivateKey
+        ffi_10_55::d2i_RSAPrivateKey
     }
 }
 
@@ -582,17 +582,17 @@ impl<T> fmt::Debug for Rsa<T> {
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl273, boringssl))] {
-        use ffi::{
+        use ffi_10_55::{
             RSA_get0_key, RSA_get0_factors, RSA_get0_crt_params, RSA_set0_key, RSA_set0_factors,
             RSA_set0_crt_params,
         };
     } else {
         #[allow(bad_style)]
         unsafe fn RSA_get0_key(
-            r: *const ffi::RSA,
-            n: *mut *const ffi::BIGNUM,
-            e: *mut *const ffi::BIGNUM,
-            d: *mut *const ffi::BIGNUM,
+            r: *const ffi_10_55::RSA,
+            n: *mut *const ffi_10_55::BIGNUM,
+            e: *mut *const ffi_10_55::BIGNUM,
+            d: *mut *const ffi_10_55::BIGNUM,
         ) {
             if !n.is_null() {
                 *n = (*r).n;
@@ -607,9 +607,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn RSA_get0_factors(
-            r: *const ffi::RSA,
-            p: *mut *const ffi::BIGNUM,
-            q: *mut *const ffi::BIGNUM,
+            r: *const ffi_10_55::RSA,
+            p: *mut *const ffi_10_55::BIGNUM,
+            q: *mut *const ffi_10_55::BIGNUM,
         ) {
             if !p.is_null() {
                 *p = (*r).p;
@@ -621,10 +621,10 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn RSA_get0_crt_params(
-            r: *const ffi::RSA,
-            dmp1: *mut *const ffi::BIGNUM,
-            dmq1: *mut *const ffi::BIGNUM,
-            iqmp: *mut *const ffi::BIGNUM,
+            r: *const ffi_10_55::RSA,
+            dmp1: *mut *const ffi_10_55::BIGNUM,
+            dmq1: *mut *const ffi_10_55::BIGNUM,
+            iqmp: *mut *const ffi_10_55::BIGNUM,
         ) {
             if !dmp1.is_null() {
                 *dmp1 = (*r).dmp1;
@@ -639,10 +639,10 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn RSA_set0_key(
-            r: *mut ffi::RSA,
-            n: *mut ffi::BIGNUM,
-            e: *mut ffi::BIGNUM,
-            d: *mut ffi::BIGNUM,
+            r: *mut ffi_10_55::RSA,
+            n: *mut ffi_10_55::BIGNUM,
+            e: *mut ffi_10_55::BIGNUM,
+            d: *mut ffi_10_55::BIGNUM,
         ) -> c_int {
             (*r).n = n;
             (*r).e = e;
@@ -652,9 +652,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn RSA_set0_factors(
-            r: *mut ffi::RSA,
-            p: *mut ffi::BIGNUM,
-            q: *mut ffi::BIGNUM,
+            r: *mut ffi_10_55::RSA,
+            p: *mut ffi_10_55::BIGNUM,
+            q: *mut ffi_10_55::BIGNUM,
         ) -> c_int {
             (*r).p = p;
             (*r).q = q;
@@ -663,10 +663,10 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn RSA_set0_crt_params(
-            r: *mut ffi::RSA,
-            dmp1: *mut ffi::BIGNUM,
-            dmq1: *mut ffi::BIGNUM,
-            iqmp: *mut ffi::BIGNUM,
+            r: *mut ffi_10_55::RSA,
+            dmp1: *mut ffi_10_55::BIGNUM,
+            dmq1: *mut ffi_10_55::BIGNUM,
+            iqmp: *mut ffi_10_55::BIGNUM,
         ) -> c_int {
             (*r).dmp1 = dmp1;
             (*r).dmq1 = dmq1;

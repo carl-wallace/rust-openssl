@@ -77,30 +77,30 @@ pub enum Private {}
 pub struct Id(c_int);
 
 impl Id {
-    pub const RSA: Id = Id(ffi::EVP_PKEY_RSA);
+    pub const RSA: Id = Id(ffi_10_55::EVP_PKEY_RSA);
     #[cfg(not(boringssl))]
-    pub const HMAC: Id = Id(ffi::EVP_PKEY_HMAC);
+    pub const HMAC: Id = Id(ffi_10_55::EVP_PKEY_HMAC);
     #[cfg(not(boringssl))]
-    pub const CMAC: Id = Id(ffi::EVP_PKEY_CMAC);
-    pub const DSA: Id = Id(ffi::EVP_PKEY_DSA);
-    pub const DH: Id = Id(ffi::EVP_PKEY_DH);
-    pub const EC: Id = Id(ffi::EVP_PKEY_EC);
+    pub const CMAC: Id = Id(ffi_10_55::EVP_PKEY_CMAC);
+    pub const DSA: Id = Id(ffi_10_55::EVP_PKEY_DSA);
+    pub const DH: Id = Id(ffi_10_55::EVP_PKEY_DH);
+    pub const EC: Id = Id(ffi_10_55::EVP_PKEY_EC);
     #[cfg(ossl111)]
-    pub const SM2: Id = Id(ffi::EVP_PKEY_SM2);
+    pub const SM2: Id = Id(ffi_10_55::EVP_PKEY_SM2);
 
     #[cfg(any(ossl110, boringssl))]
-    pub const HKDF: Id = Id(ffi::EVP_PKEY_HKDF);
+    pub const HKDF: Id = Id(ffi_10_55::EVP_PKEY_HKDF);
 
     #[cfg(any(ossl111, boringssl, libressl370))]
-    pub const ED25519: Id = Id(ffi::EVP_PKEY_ED25519);
+    pub const ED25519: Id = Id(ffi_10_55::EVP_PKEY_ED25519);
     #[cfg(ossl111)]
-    pub const ED448: Id = Id(ffi::EVP_PKEY_ED448);
+    pub const ED448: Id = Id(ffi_10_55::EVP_PKEY_ED448);
     #[cfg(any(ossl111, boringssl, libressl370))]
-    pub const X25519: Id = Id(ffi::EVP_PKEY_X25519);
+    pub const X25519: Id = Id(ffi_10_55::EVP_PKEY_X25519);
     #[cfg(ossl111)]
-    pub const X448: Id = Id(ffi::EVP_PKEY_X448);
+    pub const X448: Id = Id(ffi_10_55::EVP_PKEY_X448);
     #[cfg(ossl111)]
-    pub const POLY1305: Id = Id(ffi::EVP_PKEY_POLY1305);
+    pub const POLY1305: Id = Id(ffi_10_55::EVP_PKEY_POLY1305);
 
     /// Creates a `Id` from an integer representation.
     pub fn from_raw(value: c_int) -> Id {
@@ -134,8 +134,8 @@ pub unsafe trait HasPrivate {}
 unsafe impl HasPrivate for Private {}
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::EVP_PKEY;
-    fn drop = ffi::EVP_PKEY_free;
+    type CType = ffi_10_55::EVP_PKEY;
+    fn drop = ffi_10_55::EVP_PKEY_free;
 
     /// A public or private key.
     pub struct PKey<T>;
@@ -159,7 +159,7 @@ impl<T> PKeyRef<T> {
     #[corresponds(EVP_PKEY_get1_RSA)]
     pub fn rsa(&self) -> Result<Rsa<T>, ErrorStack> {
         unsafe {
-            let rsa = cvt_p(ffi::EVP_PKEY_get1_RSA(self.as_ptr()))?;
+            let rsa = cvt_p(ffi_10_55::EVP_PKEY_get1_RSA(self.as_ptr()))?;
             Ok(Rsa::from_ptr(rsa))
         }
     }
@@ -168,7 +168,7 @@ impl<T> PKeyRef<T> {
     #[corresponds(EVP_PKEY_get1_DSA)]
     pub fn dsa(&self) -> Result<Dsa<T>, ErrorStack> {
         unsafe {
-            let dsa = cvt_p(ffi::EVP_PKEY_get1_DSA(self.as_ptr()))?;
+            let dsa = cvt_p(ffi_10_55::EVP_PKEY_get1_DSA(self.as_ptr()))?;
             Ok(Dsa::from_ptr(dsa))
         }
     }
@@ -177,7 +177,7 @@ impl<T> PKeyRef<T> {
     #[corresponds(EVP_PKEY_get1_DH)]
     pub fn dh(&self) -> Result<Dh<T>, ErrorStack> {
         unsafe {
-            let dh = cvt_p(ffi::EVP_PKEY_get1_DH(self.as_ptr()))?;
+            let dh = cvt_p(ffi_10_55::EVP_PKEY_get1_DH(self.as_ptr()))?;
             Ok(Dh::from_ptr(dh))
         }
     }
@@ -186,7 +186,7 @@ impl<T> PKeyRef<T> {
     #[corresponds(EVP_PKEY_get1_EC_KEY)]
     pub fn ec_key(&self) -> Result<EcKey<T>, ErrorStack> {
         unsafe {
-            let ec_key = cvt_p(ffi::EVP_PKEY_get1_EC_KEY(self.as_ptr()))?;
+            let ec_key = cvt_p(ffi_10_55::EVP_PKEY_get1_EC_KEY(self.as_ptr()))?;
             Ok(EcKey::from_ptr(ec_key))
         }
     }
@@ -194,13 +194,13 @@ impl<T> PKeyRef<T> {
     /// Returns the `Id` that represents the type of this key.
     #[corresponds(EVP_PKEY_id)]
     pub fn id(&self) -> Id {
-        unsafe { Id::from_raw(ffi::EVP_PKEY_id(self.as_ptr())) }
+        unsafe { Id::from_raw(ffi_10_55::EVP_PKEY_id(self.as_ptr())) }
     }
 
     /// Returns the maximum size of a signature in bytes.
     #[corresponds(EVP_PKEY_size)]
     pub fn size(&self) -> usize {
-        unsafe { ffi::EVP_PKEY_size(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_PKEY_size(self.as_ptr()) as usize }
     }
 }
 
@@ -214,14 +214,14 @@ where
         /// The output will have a header of `-----BEGIN PUBLIC KEY-----`.
         #[corresponds(PEM_write_bio_PUBKEY)]
         public_key_to_pem,
-        ffi::PEM_write_bio_PUBKEY
+        ffi_10_55::PEM_write_bio_PUBKEY
     }
 
     to_der! {
         /// Serializes the public key into a DER-encoded SubjectPublicKeyInfo structure.
         #[corresponds(i2d_PUBKEY)]
         public_key_to_der,
-        ffi::i2d_PUBKEY
+        ffi_10_55::i2d_PUBKEY
     }
 
     /// Returns the size of the key.
@@ -230,7 +230,7 @@ where
     /// group order for an elliptic curve key, for example.
     #[corresponds(EVP_PKEY_bits)]
     pub fn bits(&self) -> u32 {
-        unsafe { ffi::EVP_PKEY_bits(self.as_ptr()) as u32 }
+        unsafe { ffi_10_55::EVP_PKEY_bits(self.as_ptr()) as u32 }
     }
 
     ///Returns the number of security bits.
@@ -239,7 +239,7 @@ where
     #[corresponds(EVP_PKEY_security_bits)]
     #[cfg(any(ossl110, libressl360))]
     pub fn security_bits(&self) -> u32 {
-        unsafe { ffi::EVP_PKEY_security_bits(self.as_ptr()) as u32 }
+        unsafe { ffi_10_55::EVP_PKEY_security_bits(self.as_ptr()) as u32 }
     }
 
     /// Compares the public component of this key with another.
@@ -248,7 +248,7 @@ where
     where
         U: HasPublic,
     {
-        let res = unsafe { ffi::EVP_PKEY_cmp(self.as_ptr(), other.as_ptr()) == 1 };
+        let res = unsafe { ffi_10_55::EVP_PKEY_cmp(self.as_ptr(), other.as_ptr()) == 1 };
         // Clear the stack. OpenSSL will put an error on the stack when the
         // keys are different types in some situations.
         let _ = ErrorStack::get();
@@ -264,13 +264,13 @@ where
     pub fn raw_public_key(&self) -> Result<Vec<u8>, ErrorStack> {
         unsafe {
             let mut len = 0;
-            cvt(ffi::EVP_PKEY_get_raw_public_key(
+            cvt(ffi_10_55::EVP_PKEY_get_raw_public_key(
                 self.as_ptr(),
                 ptr::null_mut(),
                 &mut len,
             ))?;
             let mut buf = vec![0u8; len];
-            cvt(ffi::EVP_PKEY_get_raw_public_key(
+            cvt(ffi_10_55::EVP_PKEY_get_raw_public_key(
                 self.as_ptr(),
                 buf.as_mut_ptr(),
                 &mut len,
@@ -296,14 +296,14 @@ where
         /// The output will have a header of `-----BEGIN ENCRYPTED PRIVATE KEY-----`.
         #[corresponds(PEM_write_bio_PKCS8PrivateKey)]
         private_key_to_pem_pkcs8_passphrase,
-        ffi::PEM_write_bio_PKCS8PrivateKey
+        ffi_10_55::PEM_write_bio_PKCS8PrivateKey
     }
 
     to_der! {
         /// Serializes the private key to a DER-encoded key type specific format.
         #[corresponds(i2d_PrivateKey)]
         private_key_to_der,
-        ffi::i2d_PrivateKey
+        ffi_10_55::i2d_PrivateKey
     }
 
     /// Raw byte representation of a private key.
@@ -315,13 +315,13 @@ where
     pub fn raw_private_key(&self) -> Result<Vec<u8>, ErrorStack> {
         unsafe {
             let mut len = 0;
-            cvt(ffi::EVP_PKEY_get_raw_private_key(
+            cvt(ffi_10_55::EVP_PKEY_get_raw_private_key(
                 self.as_ptr(),
                 ptr::null_mut(),
                 &mut len,
             ))?;
             let mut buf = vec![0u8; len];
-            cvt(ffi::EVP_PKEY_get_raw_private_key(
+            cvt(ffi_10_55::EVP_PKEY_get_raw_private_key(
                 self.as_ptr(),
                 buf.as_mut_ptr(),
                 &mut len,
@@ -336,7 +336,7 @@ where
     pub fn private_key_to_pkcs8(&self) -> Result<Vec<u8>, ErrorStack> {
         unsafe {
             let bio = MemBio::new()?;
-            cvt(ffi::i2d_PKCS8PrivateKey_bio(
+            cvt(ffi_10_55::i2d_PKCS8PrivateKey_bio(
                 bio.as_ptr(),
                 self.as_ptr(),
                 ptr::null(),
@@ -360,7 +360,7 @@ where
     ) -> Result<Vec<u8>, ErrorStack> {
         unsafe {
             let bio = MemBio::new()?;
-            cvt(ffi::i2d_PKCS8PrivateKey_bio(
+            cvt(ffi_10_55::i2d_PKCS8PrivateKey_bio(
                 bio.as_ptr(),
                 self.as_ptr(),
                 cipher.as_ptr(),
@@ -406,9 +406,9 @@ impl<T> PKey<T> {
     #[corresponds(EVP_PKEY_assign_RSA)]
     pub fn from_rsa(rsa: Rsa<T>) -> Result<PKey<T>, ErrorStack> {
         unsafe {
-            let evp = cvt_p(ffi::EVP_PKEY_new())?;
+            let evp = cvt_p(ffi_10_55::EVP_PKEY_new())?;
             let pkey = PKey::from_ptr(evp);
-            cvt(ffi::EVP_PKEY_assign_RSA(pkey.0, rsa.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_assign_RSA(pkey.0, rsa.as_ptr()))?;
             mem::forget(rsa);
             Ok(pkey)
         }
@@ -418,9 +418,9 @@ impl<T> PKey<T> {
     #[corresponds(EVP_PKEY_assign_DSA)]
     pub fn from_dsa(dsa: Dsa<T>) -> Result<PKey<T>, ErrorStack> {
         unsafe {
-            let evp = cvt_p(ffi::EVP_PKEY_new())?;
+            let evp = cvt_p(ffi_10_55::EVP_PKEY_new())?;
             let pkey = PKey::from_ptr(evp);
-            cvt(ffi::EVP_PKEY_assign_DSA(pkey.0, dsa.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_assign_DSA(pkey.0, dsa.as_ptr()))?;
             mem::forget(dsa);
             Ok(pkey)
         }
@@ -431,9 +431,9 @@ impl<T> PKey<T> {
     #[cfg(not(boringssl))]
     pub fn from_dh(dh: Dh<T>) -> Result<PKey<T>, ErrorStack> {
         unsafe {
-            let evp = cvt_p(ffi::EVP_PKEY_new())?;
+            let evp = cvt_p(ffi_10_55::EVP_PKEY_new())?;
             let pkey = PKey::from_ptr(evp);
-            cvt(ffi::EVP_PKEY_assign_DH(pkey.0, dh.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_assign_DH(pkey.0, dh.as_ptr()))?;
             mem::forget(dh);
             Ok(pkey)
         }
@@ -443,9 +443,9 @@ impl<T> PKey<T> {
     #[corresponds(EVP_PKEY_assign_EC_KEY)]
     pub fn from_ec_key(ec_key: EcKey<T>) -> Result<PKey<T>, ErrorStack> {
         unsafe {
-            let evp = cvt_p(ffi::EVP_PKEY_new())?;
+            let evp = cvt_p(ffi_10_55::EVP_PKEY_new())?;
             let pkey = PKey::from_ptr(evp);
-            cvt(ffi::EVP_PKEY_assign_EC_KEY(pkey.0, ec_key.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_assign_EC_KEY(pkey.0, ec_key.as_ptr()))?;
             mem::forget(ec_key);
             Ok(pkey)
         }
@@ -463,8 +463,8 @@ impl PKey<Private> {
     pub fn hmac(key: &[u8]) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
             assert!(key.len() <= c_int::max_value() as usize);
-            let key = cvt_p(ffi::EVP_PKEY_new_mac_key(
-                ffi::EVP_PKEY_HMAC,
+            let key = cvt_p(ffi_10_55::EVP_PKEY_new_mac_key(
+                ffi_10_55::EVP_PKEY_HMAC,
                 ptr::null_mut(),
                 key.as_ptr() as *const _,
                 key.len() as c_int,
@@ -611,11 +611,11 @@ impl PKey<Private> {
     #[corresponds(EVP_EC_gen)]
     #[cfg(ossl300)]
     pub fn ec_gen(curve: &str) -> Result<PKey<Private>, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         let curve = CString::new(curve).unwrap();
         unsafe {
-            let ptr = cvt_p(ffi::EVP_EC_gen(curve.as_ptr()))?;
+            let ptr = cvt_p(ffi_10_55::EVP_EC_gen(curve.as_ptr()))?;
             Ok(PKey::from_ptr(ptr))
         }
     }
@@ -635,7 +635,7 @@ impl PKey<Private> {
         #[corresponds(PEM_read_bio_PrivateKey)]
         private_key_from_pem_callback,
         PKey<Private>,
-        ffi::PEM_read_bio_PrivateKey
+        ffi_10_55::PEM_read_bio_PrivateKey
     }
 
     from_der! {
@@ -647,7 +647,7 @@ impl PKey<Private> {
         #[corresponds(d2i_AutoPrivateKey)]
         private_key_from_der,
         PKey<Private>,
-        ffi::d2i_AutoPrivateKey
+        ffi_10_55::d2i_AutoPrivateKey
     }
 
     /// Deserializes a DER-formatted PKCS#8 unencrypted private key.
@@ -655,15 +655,15 @@ impl PKey<Private> {
     /// This method is mainly for interoperability reasons. Encrypted keyfiles should be preferred.
     pub fn private_key_from_pkcs8(der: &[u8]) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let len = der.len().min(c_long::max_value() as usize) as c_long;
-            let p8inf = cvt_p(ffi::d2i_PKCS8_PRIV_KEY_INFO(
+            let p8inf = cvt_p(ffi_10_55::d2i_PKCS8_PRIV_KEY_INFO(
                 ptr::null_mut(),
                 &mut der.as_ptr(),
                 len,
             ))?;
-            let res = cvt_p(ffi::EVP_PKCS82PKEY(p8inf)).map(|p| PKey::from_ptr(p));
-            ffi::PKCS8_PRIV_KEY_INFO_free(p8inf);
+            let res = cvt_p(ffi_10_55::EVP_PKCS82PKEY(p8inf)).map(|p| PKey::from_ptr(p));
+            ffi_10_55::PKCS8_PRIV_KEY_INFO_free(p8inf);
             res
         }
     }
@@ -682,10 +682,10 @@ impl PKey<Private> {
         F: FnOnce(&mut [u8]) -> Result<usize, ErrorStack>,
     {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let mut cb = CallbackState::new(callback);
             let bio = MemBioSlice::new(der)?;
-            cvt_p(ffi::d2i_PKCS8PrivateKey_bio(
+            cvt_p(ffi_10_55::d2i_PKCS8PrivateKey_bio(
                 bio.as_ptr(),
                 ptr::null_mut(),
                 Some(invoke_passwd_cb::<F>),
@@ -707,10 +707,10 @@ impl PKey<Private> {
         passphrase: &[u8],
     ) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let bio = MemBioSlice::new(der)?;
             let passphrase = CString::new(passphrase).unwrap();
-            cvt_p(ffi::d2i_PKCS8PrivateKey_bio(
+            cvt_p(ffi_10_55::d2i_PKCS8PrivateKey_bio(
                 bio.as_ptr(),
                 ptr::null_mut(),
                 None,
@@ -730,8 +730,8 @@ impl PKey<Private> {
         key_type: Id,
     ) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::EVP_PKEY_new_raw_private_key(
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::EVP_PKEY_new_raw_private_key(
                 key_type.as_raw(),
                 ptr::null_mut(),
                 bytes.as_ptr(),
@@ -750,7 +750,7 @@ impl PKey<Public> {
         #[corresponds(PEM_read_bio_PUBKEY)]
         public_key_from_pem,
         PKey<Public>,
-        ffi::PEM_read_bio_PUBKEY
+        ffi_10_55::PEM_read_bio_PUBKEY
     }
 
     from_der! {
@@ -758,7 +758,7 @@ impl PKey<Public> {
         #[corresponds(d2i_PUBKEY)]
         public_key_from_der,
         PKey<Public>,
-        ffi::d2i_PUBKEY
+        ffi_10_55::d2i_PUBKEY
     }
 
     /// Creates a public key from its raw byte representation
@@ -771,8 +771,8 @@ impl PKey<Public> {
         key_type: Id,
     ) -> Result<PKey<Public>, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::EVP_PKEY_new_raw_public_key(
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::EVP_PKEY_new_raw_public_key(
                 key_type.as_raw(),
                 ptr::null_mut(),
                 bytes.as_ptr(),
@@ -785,14 +785,14 @@ impl PKey<Public> {
 
 cfg_if! {
     if #[cfg(any(boringssl, ossl110, libressl270))] {
-        use ffi::EVP_PKEY_up_ref;
+        use ffi_10_55::EVP_PKEY_up_ref;
     } else {
         #[allow(bad_style)]
-        unsafe extern "C" fn EVP_PKEY_up_ref(pkey: *mut ffi::EVP_PKEY) {
-            ffi::CRYPTO_add_lock(
+        unsafe extern "C" fn EVP_PKEY_up_ref(pkey: *mut ffi_10_55::EVP_PKEY) {
+            ffi_10_55::CRYPTO_add_lock(
                 &mut (*pkey).references,
                 1,
-                ffi::CRYPTO_LOCK_EVP_PKEY,
+                ffi_10_55::CRYPTO_LOCK_EVP_PKEY,
                 "pkey.rs\0".as_ptr() as *const _,
                 line!() as c_int,
             );

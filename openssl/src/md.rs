@@ -20,19 +20,19 @@ cfg_if! {
         use foreign_types::ForeignType;
         use std::ops::{Deref, DerefMut};
 
-        type Inner = *mut ffi::EVP_MD;
+        type Inner = *mut ffi_10_55::EVP_MD;
 
         impl Drop for Md {
             #[inline]
             fn drop(&mut self) {
                 unsafe {
-                    ffi::EVP_MD_free(self.as_ptr());
+                    ffi_10_55::EVP_MD_free(self.as_ptr());
                 }
             }
         }
 
         impl ForeignType for Md {
-            type CType = ffi::EVP_MD;
+            type CType = ffi_10_55::EVP_MD;
             type Ref = MdRef;
 
             #[inline]
@@ -81,7 +81,7 @@ impl Md {
     #[corresponds(EVP_get_digestbynid)]
     pub fn from_nid(type_: Nid) -> Option<&'static MdRef> {
         unsafe {
-            let ptr = ffi::EVP_get_digestbynid(type_.as_raw());
+            let ptr = ffi_10_55::EVP_get_digestbynid(type_.as_raw());
             if ptr.is_null() {
                 None
             } else {
@@ -104,7 +104,7 @@ impl Md {
         let properties = properties.map(|s| CString::new(s).unwrap());
 
         unsafe {
-            let ptr = cvt_p(ffi::EVP_MD_fetch(
+            let ptr = cvt_p(ffi_10_55::EVP_MD_fetch(
                 ctx.map_or(ptr::null_mut(), ForeignTypeRef::as_ptr),
                 algorithm.as_ptr(),
                 properties.map_or(ptr::null_mut(), |s| s.as_ptr()),
@@ -117,87 +117,87 @@ impl Md {
     #[inline]
     #[cfg(not(boringssl))]
     pub fn null() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_md_null() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_md_null() as *mut _) }
     }
 
     #[inline]
     pub fn md5() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_md5() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_md5() as *mut _) }
     }
 
     #[inline]
     pub fn sha1() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha1() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha1() as *mut _) }
     }
 
     #[inline]
     pub fn sha224() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha224() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha224() as *mut _) }
     }
 
     #[inline]
     pub fn sha256() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha256() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha256() as *mut _) }
     }
 
     #[inline]
     pub fn sha384() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha384() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha384() as *mut _) }
     }
 
     #[inline]
     pub fn sha512() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha512() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha512() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn sha3_224() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha3_224() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha3_224() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn sha3_256() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha3_256() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha3_256() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn sha3_384() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha3_384() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha3_384() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn sha3_512() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sha3_512() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sha3_512() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn shake128() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_shake128() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_shake128() as *mut _) }
     }
 
     #[cfg(ossl111)]
     #[inline]
     pub fn shake256() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_shake256() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_shake256() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_RMD160"))]
     #[inline]
     #[cfg(not(boringssl))]
     pub fn ripemd160() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_ripemd160() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_ripemd160() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM3")))]
     #[inline]
     #[cfg(not(boringssl))]
     pub fn sm3() -> &'static MdRef {
-        unsafe { MdRef::from_ptr(ffi::EVP_sm3() as *mut _) }
+        unsafe { MdRef::from_ptr(ffi_10_55::EVP_sm3() as *mut _) }
     }
 }
 
@@ -205,7 +205,7 @@ impl Md {
 pub struct MdRef(Opaque);
 
 impl ForeignTypeRef for MdRef {
-    type CType = ffi::EVP_MD;
+    type CType = ffi_10_55::EVP_MD;
 }
 
 unsafe impl Sync for MdRef {}
@@ -216,20 +216,20 @@ impl MdRef {
     #[corresponds(EVP_MD_block_size)]
     #[inline]
     pub fn block_size(&self) -> usize {
-        unsafe { ffi::EVP_MD_block_size(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_MD_block_size(self.as_ptr()) as usize }
     }
 
     /// Returns the size of the digest in bytes.
     #[corresponds(EVP_MD_size)]
     #[inline]
     pub fn size(&self) -> usize {
-        unsafe { ffi::EVP_MD_size(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_MD_size(self.as_ptr()) as usize }
     }
 
     /// Returns the [`Nid`] of the digest.
     #[corresponds(EVP_MD_type)]
     #[inline]
     pub fn type_(&self) -> Nid {
-        unsafe { Nid::from_raw(ffi::EVP_MD_type(self.as_ptr())) }
+        unsafe { Nid::from_raw(ffi_10_55::EVP_MD_type(self.as_ptr())) }
     }
 }

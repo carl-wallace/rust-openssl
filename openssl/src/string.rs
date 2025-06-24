@@ -29,7 +29,7 @@ impl fmt::Debug for OpensslString {
 }
 
 impl Stackable for OpensslString {
-    type StackType = ffi::stack_st_OPENSSL_STRING;
+    type StackType = ffi_10_55::stack_st_OPENSSL_STRING;
 }
 
 impl AsRef<str> for OpensslString {
@@ -82,13 +82,13 @@ impl fmt::Debug for OpensslStringRef {
 #[inline]
 #[cfg(not(boringssl))]
 unsafe fn free(buf: *mut c_char) {
-    ffi::OPENSSL_free(buf as *mut c_void);
+    ffi_10_55::OPENSSL_free(buf as *mut c_void);
 }
 
 #[inline]
 #[cfg(boringssl)]
 unsafe fn free(buf: *mut c_char) {
-    ffi::CRYPTO_free(
+    ffi_10_55::CRYPTO_free(
         buf as *mut c_void,
         concat!(file!(), "\0").as_ptr() as *const c_char,
         line!() as ::libc::c_int,

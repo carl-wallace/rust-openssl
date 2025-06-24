@@ -21,36 +21,36 @@ use openssl_macros::corresponds;
 
 bitflags! {
     pub struct CMSOptions : c_uint {
-        const TEXT = ffi::CMS_TEXT;
-        const CMS_NOCERTS = ffi::CMS_NOCERTS;
-        const NO_CONTENT_VERIFY = ffi::CMS_NO_CONTENT_VERIFY;
-        const NO_ATTR_VERIFY = ffi::CMS_NO_ATTR_VERIFY;
-        const NOSIGS = ffi::CMS_NOSIGS;
-        const NOINTERN = ffi::CMS_NOINTERN;
-        const NO_SIGNER_CERT_VERIFY = ffi::CMS_NO_SIGNER_CERT_VERIFY;
-        const NOVERIFY = ffi::CMS_NOVERIFY;
-        const DETACHED = ffi::CMS_DETACHED;
-        const BINARY = ffi::CMS_BINARY;
-        const NOATTR = ffi::CMS_NOATTR;
-        const NOSMIMECAP = ffi::CMS_NOSMIMECAP;
-        const NOOLDMIMETYPE = ffi::CMS_NOOLDMIMETYPE;
-        const CRLFEOL = ffi::CMS_CRLFEOL;
-        const STREAM = ffi::CMS_STREAM;
-        const NOCRL = ffi::CMS_NOCRL;
-        const PARTIAL = ffi::CMS_PARTIAL;
-        const REUSE_DIGEST = ffi::CMS_REUSE_DIGEST;
-        const USE_KEYID = ffi::CMS_USE_KEYID;
-        const DEBUG_DECRYPT = ffi::CMS_DEBUG_DECRYPT;
+        const TEXT = ffi_10_55::CMS_TEXT;
+        const CMS_NOCERTS = ffi_10_55::CMS_NOCERTS;
+        const NO_CONTENT_VERIFY = ffi_10_55::CMS_NO_CONTENT_VERIFY;
+        const NO_ATTR_VERIFY = ffi_10_55::CMS_NO_ATTR_VERIFY;
+        const NOSIGS = ffi_10_55::CMS_NOSIGS;
+        const NOINTERN = ffi_10_55::CMS_NOINTERN;
+        const NO_SIGNER_CERT_VERIFY = ffi_10_55::CMS_NO_SIGNER_CERT_VERIFY;
+        const NOVERIFY = ffi_10_55::CMS_NOVERIFY;
+        const DETACHED = ffi_10_55::CMS_DETACHED;
+        const BINARY = ffi_10_55::CMS_BINARY;
+        const NOATTR = ffi_10_55::CMS_NOATTR;
+        const NOSMIMECAP = ffi_10_55::CMS_NOSMIMECAP;
+        const NOOLDMIMETYPE = ffi_10_55::CMS_NOOLDMIMETYPE;
+        const CRLFEOL = ffi_10_55::CMS_CRLFEOL;
+        const STREAM = ffi_10_55::CMS_STREAM;
+        const NOCRL = ffi_10_55::CMS_NOCRL;
+        const PARTIAL = ffi_10_55::CMS_PARTIAL;
+        const REUSE_DIGEST = ffi_10_55::CMS_REUSE_DIGEST;
+        const USE_KEYID = ffi_10_55::CMS_USE_KEYID;
+        const DEBUG_DECRYPT = ffi_10_55::CMS_DEBUG_DECRYPT;
         #[cfg(all(not(libressl), not(ossl101)))]
-        const KEY_PARAM = ffi::CMS_KEY_PARAM;
+        const KEY_PARAM = ffi_10_55::CMS_KEY_PARAM;
         #[cfg(all(not(libressl), not(ossl101), not(ossl102)))]
-        const ASCIICRLF = ffi::CMS_ASCIICRLF;
+        const ASCIICRLF = ffi_10_55::CMS_ASCIICRLF;
     }
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::CMS_ContentInfo;
-    fn drop = ffi::CMS_ContentInfo_free;
+    type CType = ffi_10_55::CMS_ContentInfo;
+    fn drop = ffi_10_55::CMS_ContentInfo_free;
 
     /// High level CMS wrapper
     ///
@@ -80,7 +80,7 @@ impl CmsContentInfoRef {
             let cert = cert.as_ptr();
             let out = MemBio::new()?;
 
-            cvt(ffi::CMS_decrypt(
+            cvt(ffi_10_55::CMS_decrypt(
                 self.as_ptr(),
                 pkey,
                 cert,
@@ -107,7 +107,7 @@ impl CmsContentInfoRef {
             let pkey = pkey.as_ptr();
             let out = MemBio::new()?;
 
-            cvt(ffi::CMS_decrypt(
+            cvt(ffi_10_55::CMS_decrypt(
                 self.as_ptr(),
                 pkey,
                 ptr::null_mut(),
@@ -124,14 +124,14 @@ impl CmsContentInfoRef {
         /// Serializes this CmsContentInfo using DER.
         #[corresponds(i2d_CMS_ContentInfo)]
         to_der,
-        ffi::i2d_CMS_ContentInfo
+        ffi_10_55::i2d_CMS_ContentInfo
     }
 
     to_pem! {
         /// Serializes this CmsContentInfo using DER.
         #[corresponds(PEM_write_bio_CMS)]
         to_pem,
-        ffi::PEM_write_bio_CMS
+        ffi_10_55::PEM_write_bio_CMS
     }
 }
 
@@ -142,7 +142,7 @@ impl CmsContentInfo {
         unsafe {
             let bio = MemBioSlice::new(smime)?;
 
-            let cms = cvt_p(ffi::SMIME_read_CMS(bio.as_ptr(), ptr::null_mut()))?;
+            let cms = cvt_p(ffi_10_55::SMIME_read_CMS(bio.as_ptr(), ptr::null_mut()))?;
 
             Ok(CmsContentInfo::from_ptr(cms))
         }
@@ -153,7 +153,7 @@ impl CmsContentInfo {
         #[corresponds(d2i_CMS_ContentInfo)]
         from_der,
         CmsContentInfo,
-        ffi::d2i_CMS_ContentInfo
+        ffi_10_55::d2i_CMS_ContentInfo
     }
 
     from_pem! {
@@ -161,7 +161,7 @@ impl CmsContentInfo {
         #[corresponds(PEM_read_bio_CMS)]
         from_pem,
         CmsContentInfo,
-        ffi::PEM_read_bio_CMS
+        ffi_10_55::PEM_read_bio_CMS
     }
 
     /// Given a signing cert `signcert`, private key `pkey`, a certificate stack `certs`,
@@ -189,7 +189,7 @@ impl CmsContentInfo {
             let data_bio_ptr = data_bio.as_ref().map_or(ptr::null_mut(), |p| p.as_ptr());
             let certs = certs.map_or(ptr::null_mut(), |p| p.as_ptr());
 
-            let cms = cvt_p(ffi::CMS_sign(
+            let cms = cvt_p(ffi_10_55::CMS_sign(
                 signcert,
                 pkey,
                 certs,
@@ -217,7 +217,7 @@ impl CmsContentInfo {
         unsafe {
             let data_bio = MemBioSlice::new(data)?;
 
-            let cms = cvt_p(ffi::CMS_encrypt(
+            let cms = cvt_p(ffi_10_55::CMS_encrypt(
                 certs.as_ptr(),
                 data_bio.as_ptr(),
                 cipher.as_ptr(),
@@ -256,7 +256,7 @@ impl CmsContentInfo {
                 .map_or(ptr::null_mut(), |p| p.as_ptr());
             let out_bio = MemBio::new()?;
 
-            cvt(ffi::CMS_verify(
+            cvt(ffi_10_55::CMS_verify(
                 self.as_ptr(),
                 certs_ptr,
                 store_ptr,
@@ -478,7 +478,7 @@ mod test {
                 let error_array = es.errors();
                 assert_eq!(1, error_array.len());
                 let code = error_array[0].code();
-                assert_eq!(ffi::ERR_GET_REASON(code), CMS_R_CERTIFICATE_VERIFY_ERROR);
+                assert_eq!(ffi_10_55::ERR_GET_REASON(code), CMS_R_CERTIFICATE_VERIFY_ERROR);
             }
             _ => panic!("expected CMS verification error, got Ok()"),
         }

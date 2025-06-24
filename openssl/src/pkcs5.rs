@@ -41,20 +41,20 @@ pub fn bytes_to_key(
         assert!(data.len() <= c_int::max_value() as usize);
         let salt_ptr = match salt {
             Some(salt) => {
-                assert_eq!(salt.len(), ffi::PKCS5_SALT_LEN as usize);
+                assert_eq!(salt.len(), ffi_10_55::PKCS5_SALT_LEN as usize);
                 salt.as_ptr()
             }
             None => ptr::null(),
         };
 
-        ffi::init();
+        ffi_10_55::init();
 
         let mut iv = cipher.iv_len().map(|l| vec![0; l]);
 
         let cipher = cipher.as_ptr();
         let digest = digest.as_ptr();
 
-        let len = cvt(ffi::EVP_BytesToKey(
+        let len = cvt(ffi_10_55::EVP_BytesToKey(
             cipher,
             digest,
             salt_ptr,
@@ -71,7 +71,7 @@ pub fn bytes_to_key(
             .map(|v| v.as_mut_ptr())
             .unwrap_or(ptr::null_mut());
 
-        cvt(ffi::EVP_BytesToKey(
+        cvt(ffi_10_55::EVP_BytesToKey(
             cipher,
             digest,
             salt_ptr,
@@ -96,8 +96,8 @@ pub fn pbkdf2_hmac(
     key: &mut [u8],
 ) -> Result<(), ErrorStack> {
     unsafe {
-        ffi::init();
-        cvt(ffi::PKCS5_PBKDF2_HMAC(
+        ffi_10_55::init();
+        cvt(ffi_10_55::PKCS5_PBKDF2_HMAC(
             pass.as_ptr() as *const _,
             pass.len().try_into().unwrap(),
             salt.as_ptr(),
@@ -127,8 +127,8 @@ pub fn scrypt(
     key: &mut [u8],
 ) -> Result<(), ErrorStack> {
     unsafe {
-        ffi::init();
-        cvt(ffi::EVP_PBE_scrypt(
+        ffi_10_55::init();
+        cvt(ffi_10_55::EVP_PBE_scrypt(
             pass.as_ptr() as *const _,
             pass.len(),
             salt.as_ptr() as *const _,

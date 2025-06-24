@@ -12,8 +12,8 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::DH;
-    fn drop = ffi::DH_free;
+    type CType = ffi_10_55::DH;
+    fn drop = ffi_10_55::DH_free;
 
     pub struct Dh<T>;
 
@@ -30,14 +30,14 @@ where
         /// The output will have a header of `-----BEGIN DH PARAMETERS-----`.
         #[corresponds(PEM_write_bio_DHparams)]
         params_to_pem,
-        ffi::PEM_write_bio_DHparams
+        ffi_10_55::PEM_write_bio_DHparams
     }
 
     to_der! {
         /// Serializes the parameters into a DER-encoded PKCS#3 DHparameter structure.
         #[corresponds(i2d_DHparams)]
         params_to_der,
-        ffi::i2d_DHparams
+        ffi_10_55::i2d_DHparams
     }
 
     /// Validates DH parameters for correctness
@@ -45,7 +45,7 @@ where
     pub fn check_key(&self) -> Result<bool, ErrorStack> {
         unsafe {
             let mut codes = 0;
-            cvt(ffi::DH_check(self.as_ptr(), &mut codes))?;
+            cvt(ffi_10_55::DH_check(self.as_ptr(), &mut codes))?;
             Ok(codes == 0)
         }
     }
@@ -64,7 +64,7 @@ impl Dh<Params> {
         generator: BigNum,
     ) -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            let dh = Dh::from_ptr(cvt_p(ffi::DH_new())?);
+            let dh = Dh::from_ptr(cvt_p(ffi_10_55::DH_new())?);
             cvt(DH_set0_pqg(
                 dh.0,
                 prime_p.as_ptr(),
@@ -93,7 +93,7 @@ impl Dh<Params> {
             cvt(DH_set0_key(dh_ptr, ptr::null_mut(), priv_key.as_ptr()))?;
             mem::forget(priv_key);
 
-            cvt(ffi::DH_generate_key(dh_ptr))?;
+            cvt(ffi_10_55::DH_generate_key(dh_ptr))?;
             mem::forget(self);
             Ok(Dh::from_ptr(dh_ptr))
         }
@@ -113,8 +113,8 @@ impl Dh<Params> {
     #[corresponds(DH_generate_parameters_ex)]
     pub fn generate_params(prime_len: u32, generator: u32) -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            let dh = Dh::from_ptr(cvt_p(ffi::DH_new())?);
-            cvt(ffi::DH_generate_parameters_ex(
+            let dh = Dh::from_ptr(cvt_p(ffi_10_55::DH_new())?);
+            cvt(ffi_10_55::DH_generate_parameters_ex(
                 dh.0,
                 prime_len as i32,
                 generator as i32,
@@ -129,7 +129,7 @@ impl Dh<Params> {
     pub fn generate_key(self) -> Result<Dh<Private>, ErrorStack> {
         unsafe {
             let dh_ptr = self.0;
-            cvt(ffi::DH_generate_key(dh_ptr))?;
+            cvt(ffi_10_55::DH_generate_key(dh_ptr))?;
             mem::forget(self);
             Ok(Dh::from_ptr(dh_ptr))
         }
@@ -142,7 +142,7 @@ impl Dh<Params> {
         #[corresponds(PEM_read_bio_DHparams)]
         params_from_pem,
         Dh<Params>,
-        ffi::PEM_read_bio_DHparams
+        ffi_10_55::PEM_read_bio_DHparams
     }
 
     from_der! {
@@ -150,7 +150,7 @@ impl Dh<Params> {
         #[corresponds(d2i_DHparams)]
         params_from_der,
         Dh<Params>,
-        ffi::d2i_DHparams
+        ffi_10_55::d2i_DHparams
     }
 
     /// Requires OpenSSL 1.0.2 or newer.
@@ -158,8 +158,8 @@ impl Dh<Params> {
     #[cfg(any(ossl102, ossl110))]
     pub fn get_1024_160() -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::DH_get_1024_160()).map(|p| Dh::from_ptr(p))
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::DH_get_1024_160()).map(|p| Dh::from_ptr(p))
         }
     }
 
@@ -168,8 +168,8 @@ impl Dh<Params> {
     #[cfg(any(ossl102, ossl110))]
     pub fn get_2048_224() -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::DH_get_2048_224()).map(|p| Dh::from_ptr(p))
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::DH_get_2048_224()).map(|p| Dh::from_ptr(p))
         }
     }
 
@@ -178,8 +178,8 @@ impl Dh<Params> {
     #[cfg(any(ossl102, ossl110))]
     pub fn get_2048_256() -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::DH_get_2048_256()).map(|p| Dh::from_ptr(p))
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::DH_get_2048_256()).map(|p| Dh::from_ptr(p))
         }
     }
 }
@@ -246,9 +246,9 @@ where
     #[corresponds(DH_compute_key)]
     pub fn compute_key(&self, public_key: &BigNumRef) -> Result<Vec<u8>, ErrorStack> {
         unsafe {
-            let key_len = ffi::DH_size(self.as_ptr());
+            let key_len = ffi_10_55::DH_size(self.as_ptr());
             let mut key = vec![0u8; key_len as usize];
-            cvt(ffi::DH_compute_key(
+            cvt(ffi_10_55::DH_compute_key(
                 key.as_mut_ptr(),
                 public_key.as_ptr(),
                 self.as_ptr(),
@@ -270,14 +270,14 @@ where
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl270, boringssl))] {
-        use ffi::{DH_set0_pqg, DH_get0_pqg, DH_get0_key, DH_set0_key};
+        use ffi_10_55::{DH_set0_pqg, DH_get0_pqg, DH_get0_key, DH_set0_key};
     } else {
         #[allow(bad_style)]
         unsafe fn DH_set0_pqg(
-            dh: *mut ffi::DH,
-            p: *mut ffi::BIGNUM,
-            q: *mut ffi::BIGNUM,
-            g: *mut ffi::BIGNUM,
+            dh: *mut ffi_10_55::DH,
+            p: *mut ffi_10_55::BIGNUM,
+            q: *mut ffi_10_55::BIGNUM,
+            g: *mut ffi_10_55::BIGNUM,
         ) -> ::libc::c_int {
             (*dh).p = p;
             (*dh).q = q;
@@ -287,10 +287,10 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DH_get0_pqg(
-            dh: *mut ffi::DH,
-            p: *mut *const ffi::BIGNUM,
-            q: *mut *const ffi::BIGNUM,
-            g: *mut *const ffi::BIGNUM,
+            dh: *mut ffi_10_55::DH,
+            p: *mut *const ffi_10_55::BIGNUM,
+            q: *mut *const ffi_10_55::BIGNUM,
+            g: *mut *const ffi_10_55::BIGNUM,
         ) {
             if !p.is_null() {
                 *p = (*dh).p;
@@ -305,9 +305,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DH_set0_key(
-            dh: *mut ffi::DH,
-            pub_key: *mut ffi::BIGNUM,
-            priv_key: *mut ffi::BIGNUM,
+            dh: *mut ffi_10_55::DH,
+            pub_key: *mut ffi_10_55::BIGNUM,
+            priv_key: *mut ffi_10_55::BIGNUM,
         ) -> ::libc::c_int {
             (*dh).pub_key = pub_key;
             (*dh).priv_key = priv_key;
@@ -316,9 +316,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn DH_get0_key(
-            dh: *mut ffi::DH,
-            pub_key: *mut *const ffi::BIGNUM,
-            priv_key: *mut *const ffi::BIGNUM,
+            dh: *mut ffi_10_55::DH,
+            pub_key: *mut *const ffi_10_55::BIGNUM,
+            priv_key: *mut *const ffi_10_55::BIGNUM,
         ) {
             if !pub_key.is_null() {
                 *pub_key = (*dh).pub_key;

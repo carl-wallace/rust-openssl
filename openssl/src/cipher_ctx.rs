@@ -64,15 +64,15 @@ use std::ptr;
 
 cfg_if! {
     if #[cfg(ossl300)] {
-        use ffi::EVP_CIPHER_CTX_get0_cipher;
+        use ffi_10_55::EVP_CIPHER_CTX_get0_cipher;
     } else {
-        use ffi::EVP_CIPHER_CTX_cipher as EVP_CIPHER_CTX_get0_cipher;
+        use ffi_10_55::EVP_CIPHER_CTX_cipher as EVP_CIPHER_CTX_get0_cipher;
     }
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::EVP_CIPHER_CTX;
-    fn drop = ffi::EVP_CIPHER_CTX_free;
+    type CType = ffi_10_55::EVP_CIPHER_CTX;
+    fn drop = ffi_10_55::EVP_CIPHER_CTX_free;
 
     /// A context object used to perform symmetric encryption operations.
     pub struct CipherCtx;
@@ -84,10 +84,10 @@ impl CipherCtx {
     /// Creates a new context.
     #[corresponds(EVP_CIPHER_CTX_new)]
     pub fn new() -> Result<Self, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         unsafe {
-            let ptr = cvt_p(ffi::EVP_CIPHER_CTX_new())?;
+            let ptr = cvt_p(ffi_10_55::EVP_CIPHER_CTX_new())?;
             Ok(CipherCtx::from_ptr(ptr))
         }
     }
@@ -111,7 +111,7 @@ impl CipherCtxRef {
         key: Option<&[u8]>,
         iv: Option<&[u8]>,
     ) -> Result<(), ErrorStack> {
-        self.cipher_init(type_, key, iv, ffi::EVP_EncryptInit_ex)
+        self.cipher_init(type_, key, iv, ffi_10_55::EVP_EncryptInit_ex)
     }
 
     /// Initializes the context for decryption.
@@ -131,7 +131,7 @@ impl CipherCtxRef {
         key: Option<&[u8]>,
         iv: Option<&[u8]>,
     ) -> Result<(), ErrorStack> {
-        self.cipher_init(type_, key, iv, ffi::EVP_DecryptInit_ex)
+        self.cipher_init(type_, key, iv, ffi_10_55::EVP_DecryptInit_ex)
     }
 
     fn cipher_init(
@@ -140,9 +140,9 @@ impl CipherCtxRef {
         key: Option<&[u8]>,
         iv: Option<&[u8]>,
         f: unsafe extern "C" fn(
-            *mut ffi::EVP_CIPHER_CTX,
-            *const ffi::EVP_CIPHER,
-            *mut ffi::ENGINE,
+            *mut ffi_10_55::EVP_CIPHER_CTX,
+            *const ffi_10_55::EVP_CIPHER,
+            *mut ffi_10_55::ENGINE,
             *const c_uchar,
             *const c_uchar,
         ) -> c_int,
@@ -212,7 +212,7 @@ impl CipherCtxRef {
         let pub_keys_len = i32::try_from(pub_keys.len()).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_SealInit(
+            cvt(ffi_10_55::EVP_SealInit(
                 self.as_ptr(),
                 type_.map_or(ptr::null(), |p| p.as_ptr()),
                 keys.as_mut_ptr(),
@@ -258,7 +258,7 @@ impl CipherCtxRef {
 
         let len = c_int::try_from(encrypted_key.len()).unwrap();
         unsafe {
-            cvt(ffi::EVP_OpenInit(
+            cvt(ffi_10_55::EVP_OpenInit(
                 self.as_ptr(),
                 type_.map_or(ptr::null(), |p| p.as_ptr()),
                 encrypted_key.as_ptr(),
@@ -288,7 +288,7 @@ impl CipherCtxRef {
     pub fn block_size(&self) -> usize {
         self.assert_cipher();
 
-        unsafe { ffi::EVP_CIPHER_CTX_block_size(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_CIPHER_CTX_block_size(self.as_ptr()) as usize }
     }
 
     /// Returns the key length of the context's cipher.
@@ -300,7 +300,7 @@ impl CipherCtxRef {
     pub fn key_length(&self) -> usize {
         self.assert_cipher();
 
-        unsafe { ffi::EVP_CIPHER_CTX_key_length(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_CIPHER_CTX_key_length(self.as_ptr()) as usize }
     }
 
     /// Generates a random key based on the configured cipher.
@@ -319,7 +319,7 @@ impl CipherCtxRef {
         assert!(buf.len() >= self.key_length());
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_rand_key(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_rand_key(
                 self.as_ptr(),
                 buf.as_mut_ptr(),
             ))?;
@@ -340,7 +340,7 @@ impl CipherCtxRef {
         self.assert_cipher();
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_set_key_length(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_set_key_length(
                 self.as_ptr(),
                 len.try_into().unwrap(),
             ))?;
@@ -360,7 +360,7 @@ impl CipherCtxRef {
     pub fn iv_length(&self) -> usize {
         self.assert_cipher();
 
-        unsafe { ffi::EVP_CIPHER_CTX_iv_length(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_CIPHER_CTX_iv_length(self.as_ptr()) as usize }
     }
 
     /// Returns the `num` parameter of the cipher.
@@ -376,7 +376,7 @@ impl CipherCtxRef {
     pub fn num(&self) -> usize {
         self.assert_cipher();
 
-        unsafe { ffi::EVP_CIPHER_CTX_num(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_CIPHER_CTX_num(self.as_ptr()) as usize }
     }
 
     /// Sets the length of the IV expected by this context.
@@ -393,9 +393,9 @@ impl CipherCtxRef {
         let len = c_int::try_from(len).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_ctrl(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_ctrl(
                 self.as_ptr(),
-                ffi::EVP_CTRL_GCM_SET_IVLEN,
+                ffi_10_55::EVP_CTRL_GCM_SET_IVLEN,
                 len,
                 ptr::null_mut(),
             ))?;
@@ -418,7 +418,7 @@ impl CipherCtxRef {
     pub fn tag_length(&self) -> usize {
         self.assert_cipher();
 
-        unsafe { ffi::EVP_CIPHER_CTX_get_tag_length(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_CIPHER_CTX_get_tag_length(self.as_ptr()) as usize }
     }
 
     /// Retrieves the calculated authentication tag from the context.
@@ -432,9 +432,9 @@ impl CipherCtxRef {
         let len = c_int::try_from(tag.len()).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_ctrl(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_ctrl(
                 self.as_ptr(),
-                ffi::EVP_CTRL_GCM_GET_TAG,
+                ffi_10_55::EVP_CTRL_GCM_GET_TAG,
                 len,
                 tag.as_mut_ptr() as *mut _,
             ))?;
@@ -451,9 +451,9 @@ impl CipherCtxRef {
         let len = c_int::try_from(len).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_ctrl(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_ctrl(
                 self.as_ptr(),
-                ffi::EVP_CTRL_GCM_SET_TAG,
+                ffi_10_55::EVP_CTRL_GCM_SET_TAG,
                 len,
                 ptr::null_mut(),
             ))?;
@@ -468,9 +468,9 @@ impl CipherCtxRef {
         let len = c_int::try_from(tag.len()).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_CIPHER_CTX_ctrl(
+            cvt(ffi_10_55::EVP_CIPHER_CTX_ctrl(
                 self.as_ptr(),
-                ffi::EVP_CTRL_GCM_SET_TAG,
+                ffi_10_55::EVP_CTRL_GCM_SET_TAG,
                 len,
                 tag.as_ptr() as *mut _,
             ))?;
@@ -485,7 +485,7 @@ impl CipherCtxRef {
     #[corresponds(EVP_CIPHER_CTX_set_padding)]
     pub fn set_padding(&mut self, padding: bool) {
         unsafe {
-            ffi::EVP_CIPHER_CTX_set_padding(self.as_ptr(), padding as c_int);
+            ffi_10_55::EVP_CIPHER_CTX_set_padding(self.as_ptr(), padding as c_int);
         }
     }
 
@@ -497,7 +497,7 @@ impl CipherCtxRef {
         let len = c_int::try_from(len).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_CipherUpdate(
+            cvt(ffi_10_55::EVP_CipherUpdate(
                 self.as_ptr(),
                 ptr::null_mut(),
                 &mut 0,
@@ -566,7 +566,7 @@ impl CipherCtxRef {
 
         let mut outlen = 0;
 
-        cvt(ffi::EVP_CipherUpdate(
+        cvt(ffi_10_55::EVP_CipherUpdate(
             self.as_ptr(),
             output.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
             &mut outlen,
@@ -623,7 +623,7 @@ impl CipherCtxRef {
         let inlen = c_int::try_from(inlen).unwrap();
         let mut outlen = 0;
         unsafe {
-            cvt(ffi::EVP_CipherUpdate(
+            cvt(ffi_10_55::EVP_CipherUpdate(
                 self.as_ptr(),
                 data.as_mut_ptr(),
                 &mut outlen,
@@ -674,7 +674,7 @@ impl CipherCtxRef {
     ) -> Result<usize, ErrorStack> {
         let mut outl = 0;
 
-        cvt(ffi::EVP_CipherFinal(
+        cvt(ffi_10_55::EVP_CipherFinal(
             self.as_ptr(),
             output.as_mut_ptr(),
             &mut outl,

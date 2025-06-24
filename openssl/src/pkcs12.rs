@@ -17,8 +17,8 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::PKCS12;
-    fn drop = ffi::PKCS12_free;
+    type CType = ffi_10_55::PKCS12;
+    fn drop = ffi_10_55::PKCS12_free;
 
     pub struct Pkcs12;
     pub struct Pkcs12Ref;
@@ -29,7 +29,7 @@ impl Pkcs12Ref {
         /// Serializes the `Pkcs12` to its standard DER encoding.
         #[corresponds(i2d_PKCS12)]
         to_der,
-        ffi::i2d_PKCS12
+        ffi_10_55::i2d_PKCS12
     }
 
     /// Deprecated.
@@ -55,7 +55,7 @@ impl Pkcs12Ref {
             let mut cert = ptr::null_mut();
             let mut ca = ptr::null_mut();
 
-            cvt(ffi::PKCS12_parse(
+            cvt(ffi_10_55::PKCS12_parse(
                 self.as_ptr(),
                 pass.as_ptr(),
                 &mut pkey,
@@ -78,7 +78,7 @@ impl Pkcs12 {
         #[corresponds(d2i_PKCS12)]
         from_der,
         Pkcs12,
-        ffi::d2i_PKCS12
+        ffi_10_55::d2i_PKCS12
     }
 
     /// Creates a new builder for a protected pkcs12 certificate.
@@ -91,7 +91,7 @@ impl Pkcs12 {
     /// * `mac_iter` - `2048`
     /// * `mac_md` - `SHA-256` (3.0.0+) or `SHA-1` (`SHA-1` only for BoringSSL)
     pub fn builder() -> Pkcs12Builder {
-        ffi::init();
+        ffi_10_55::init();
 
         Pkcs12Builder {
             name: None,
@@ -100,8 +100,8 @@ impl Pkcs12 {
             ca: None,
             nid_key: Nid::UNDEF,
             nid_cert: Nid::UNDEF,
-            iter: ffi::PKCS12_DEFAULT_ITER,
-            mac_iter: ffi::PKCS12_DEFAULT_ITER,
+            iter: ffi_10_55::PKCS12_DEFAULT_ITER,
+            mac_iter: ffi_10_55::PKCS12_DEFAULT_ITER,
             #[cfg(not(boringssl))]
             mac_md: None,
         }
@@ -243,7 +243,7 @@ impl Pkcs12Builder {
             // https://www.openssl.org/docs/manmaster/crypto/PKCS12_create.html
             let keytype = 0;
 
-            let pkcs12 = cvt_p(ffi::PKCS12_create(
+            let pkcs12 = cvt_p(ffi_10_55::PKCS12_create(
                 pass as *mut _,
                 friendly_name as *mut _,
                 pkey as *mut _,
@@ -266,7 +266,7 @@ impl Pkcs12Builder {
                     .map(|md_type| md_type.as_ptr())
                     .unwrap_or(ptr::null());
 
-                cvt(ffi::PKCS12_set_mac(
+                cvt(ffi_10_55::PKCS12_set_mac(
                     pkcs12.as_ptr(),
                     pass,
                     -1,

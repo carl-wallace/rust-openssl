@@ -94,14 +94,14 @@ use std::ptr;
 
 cfg_if! {
     if #[cfg(any(ossl110, boringssl))] {
-        use ffi::{EVP_MD_CTX_free, EVP_MD_CTX_new};
+        use ffi_10_55::{EVP_MD_CTX_free, EVP_MD_CTX_new};
     } else {
-        use ffi::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
+        use ffi_10_55::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
     }
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::EVP_MD_CTX;
+    type CType = ffi_10_55::EVP_MD_CTX;
     fn drop = EVP_MD_CTX_free;
 
     pub struct MdCtx;
@@ -114,7 +114,7 @@ impl MdCtx {
     #[corresponds(EVP_MD_CTX_new)]
     #[inline]
     pub fn new() -> Result<Self, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         unsafe {
             let ptr = cvt_p(EVP_MD_CTX_new())?;
@@ -129,7 +129,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_init(&mut self, digest: &MdRef) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestInit_ex(
+            cvt(ffi_10_55::EVP_DigestInit_ex(
                 self.as_ptr(),
                 digest.as_ptr(),
                 ptr::null_mut(),
@@ -154,7 +154,7 @@ impl MdCtxRef {
     {
         unsafe {
             let mut p = ptr::null_mut();
-            cvt(ffi::EVP_DigestSignInit(
+            cvt(ffi_10_55::EVP_DigestSignInit(
                 self.as_ptr(),
                 &mut p,
                 digest.map_or(ptr::null(), |p| p.as_ptr()),
@@ -180,7 +180,7 @@ impl MdCtxRef {
     {
         unsafe {
             let mut p = ptr::null_mut();
-            cvt(ffi::EVP_DigestVerifyInit(
+            cvt(ffi_10_55::EVP_DigestVerifyInit(
                 self.as_ptr(),
                 &mut p,
                 digest.map_or(ptr::null(), |p| p.as_ptr()),
@@ -196,7 +196,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_update(&mut self, data: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestUpdate(
+            cvt(ffi_10_55::EVP_DigestUpdate(
                 self.as_ptr(),
                 data.as_ptr() as *const _,
                 data.len(),
@@ -211,7 +211,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_sign_update(&mut self, data: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestSignUpdate(
+            cvt(ffi_10_55::EVP_DigestSignUpdate(
                 self.as_ptr(),
                 data.as_ptr() as *const _,
                 data.len(),
@@ -226,7 +226,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_verify_update(&mut self, data: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestVerifyUpdate(
+            cvt(ffi_10_55::EVP_DigestVerifyUpdate(
                 self.as_ptr(),
                 data.as_ptr() as *const _,
                 data.len(),
@@ -243,7 +243,7 @@ impl MdCtxRef {
         let mut len = u32::try_from(out.len()).unwrap_or(u32::MAX);
 
         unsafe {
-            cvt(ffi::EVP_DigestFinal(
+            cvt(ffi_10_55::EVP_DigestFinal(
                 self.as_ptr(),
                 out.as_mut_ptr(),
                 &mut len,
@@ -261,7 +261,7 @@ impl MdCtxRef {
     #[cfg(ossl111)]
     pub fn digest_final_xof(&mut self, out: &mut [u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestFinalXOF(
+            cvt(ffi_10_55::EVP_DigestFinalXOF(
                 self.as_ptr(),
                 out.as_mut_ptr(),
                 out.len(),
@@ -281,7 +281,7 @@ impl MdCtxRef {
         let mut len = out.as_ref().map_or(0, |b| b.len());
 
         unsafe {
-            cvt(ffi::EVP_DigestSignFinal(
+            cvt(ffi_10_55::EVP_DigestSignFinal(
                 self.as_ptr(),
                 out.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut len,
@@ -309,7 +309,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_verify_final(&mut self, signature: &[u8]) -> Result<bool, ErrorStack> {
         unsafe {
-            let r = cvt_n(ffi::EVP_DigestVerifyFinal(
+            let r = cvt_n(ffi_10_55::EVP_DigestVerifyFinal(
                 self.as_ptr(),
                 signature.as_ptr() as *mut _,
                 signature.len(),
@@ -331,7 +331,7 @@ impl MdCtxRef {
         let mut len = to.as_ref().map_or(0, |b| b.len());
 
         unsafe {
-            cvt(ffi::EVP_DigestSign(
+            cvt(ffi_10_55::EVP_DigestSign(
                 self.as_ptr(),
                 to.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut len,
@@ -369,7 +369,7 @@ impl MdCtxRef {
     #[inline]
     pub fn digest_verify(&mut self, data: &[u8], signature: &[u8]) -> Result<bool, ErrorStack> {
         unsafe {
-            let r = cvt(ffi::EVP_DigestVerify(
+            let r = cvt(ffi_10_55::EVP_DigestVerify(
                 self.as_ptr(),
                 signature.as_ptr(),
                 signature.len(),
@@ -384,7 +384,7 @@ impl MdCtxRef {
     #[corresponds(EVP_MD_CTX_size)]
     #[inline]
     pub fn size(&self) -> usize {
-        unsafe { ffi::EVP_MD_CTX_size(self.as_ptr()) as usize }
+        unsafe { ffi_10_55::EVP_MD_CTX_size(self.as_ptr()) as usize }
     }
 
     /// Resets the underlying EVP_MD_CTX instance
@@ -393,7 +393,7 @@ impl MdCtxRef {
     #[inline]
     pub fn reset(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            let _ = cvt(ffi::EVP_MD_CTX_reset(self.as_ptr()))?;
+            let _ = cvt(ffi_10_55::EVP_MD_CTX_reset(self.as_ptr()))?;
             Ok(())
         }
     }

@@ -82,9 +82,9 @@ use crate::{cvt, cvt_p};
 
 cfg_if! {
     if #[cfg(ossl110)] {
-        use ffi::{EVP_MD_CTX_free, EVP_MD_CTX_new};
+        use ffi_10_55::{EVP_MD_CTX_free, EVP_MD_CTX_new};
     } else {
-        use ffi::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
+        use ffi_10_55::{EVP_MD_CTX_create as EVP_MD_CTX_new, EVP_MD_CTX_destroy as EVP_MD_CTX_free};
     }
 }
 
@@ -112,8 +112,8 @@ impl RsaPssSaltlen {
 
 /// A type which computes cryptographic signatures of data.
 pub struct Signer<'a> {
-    md_ctx: *mut ffi::EVP_MD_CTX,
-    pctx: *mut ffi::EVP_PKEY_CTX,
+    md_ctx: *mut ffi_10_55::EVP_MD_CTX,
+    pctx: *mut ffi_10_55::EVP_PKEY_CTX,
     _p: PhantomData<&'a ()>,
 }
 
@@ -169,11 +169,11 @@ impl Signer<'_> {
         T: HasPrivate,
     {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
             let ctx = cvt_p(EVP_MD_CTX_new())?;
-            let mut pctx: *mut ffi::EVP_PKEY_CTX = ptr::null_mut();
-            let r = ffi::EVP_DigestSignInit(
+            let mut pctx: *mut ffi_10_55::EVP_PKEY_CTX = ptr::null_mut();
+            let r = ffi_10_55::EVP_DigestSignInit(
                 ctx,
                 &mut pctx,
                 type_.map(|t| t.as_ptr()).unwrap_or(ptr::null()),
@@ -203,7 +203,7 @@ impl Signer<'_> {
     pub fn rsa_padding(&self) -> Result<Padding, ErrorStack> {
         unsafe {
             let mut pad = 0;
-            cvt(ffi::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
+            cvt(ffi_10_55::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
                 .map(|_| Padding::from_raw(pad))
         }
     }
@@ -217,7 +217,7 @@ impl Signer<'_> {
     /// [`EVP_PKEY_CTX_set_rsa_padding`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_padding.html
     pub fn set_rsa_padding(&mut self, padding: Padding) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_padding(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_padding(
                 self.pctx,
                 padding.as_raw(),
             ))
@@ -234,7 +234,7 @@ impl Signer<'_> {
     /// [`EVP_PKEY_CTX_set_rsa_pss_saltlen`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_pss_saltlen.html
     pub fn set_rsa_pss_saltlen(&mut self, len: RsaPssSaltlen) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_pss_saltlen(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_pss_saltlen(
                 self.pctx,
                 len.as_raw(),
             ))
@@ -251,7 +251,7 @@ impl Signer<'_> {
     /// [`EVP_PKEY_CTX_set_rsa_mgf1_md`]: https://www.openssl.org/docs/manmaster/man7/RSA-PSS.html
     pub fn set_rsa_mgf1_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_mgf1_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_mgf1_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -269,7 +269,7 @@ impl Signer<'_> {
     /// [`EVP_DigestUpdate`]: https://www.openssl.org/docs/manmaster/man3/EVP_DigestInit.html
     pub fn update(&mut self, buf: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestUpdate(
+            cvt(ffi_10_55::EVP_DigestUpdate(
                 self.md_ctx,
                 buf.as_ptr() as *const _,
                 buf.len(),
@@ -294,7 +294,7 @@ impl Signer<'_> {
     fn len_intern(&self) -> Result<usize, ErrorStack> {
         unsafe {
             let mut len = 0;
-            cvt(ffi::EVP_DigestSignFinal(
+            cvt(ffi_10_55::EVP_DigestSignFinal(
                 self.md_ctx,
                 ptr::null_mut(),
                 &mut len,
@@ -307,7 +307,7 @@ impl Signer<'_> {
     fn len_intern(&self) -> Result<usize, ErrorStack> {
         unsafe {
             let mut len = 0;
-            cvt(ffi::EVP_DigestSign(
+            cvt(ffi_10_55::EVP_DigestSign(
                 self.md_ctx,
                 ptr::null_mut(),
                 &mut len,
@@ -329,7 +329,7 @@ impl Signer<'_> {
     pub fn sign(&self, buf: &mut [u8]) -> Result<usize, ErrorStack> {
         unsafe {
             let mut len = buf.len();
-            cvt(ffi::EVP_DigestSignFinal(
+            cvt(ffi_10_55::EVP_DigestSignFinal(
                 self.md_ctx,
                 buf.as_mut_ptr() as *mut _,
                 &mut len,
@@ -368,7 +368,7 @@ impl Signer<'_> {
     ) -> Result<usize, ErrorStack> {
         unsafe {
             let mut sig_len = sig_buf.len();
-            cvt(ffi::EVP_DigestSign(
+            cvt(ffi_10_55::EVP_DigestSign(
                 self.md_ctx,
                 sig_buf.as_mut_ptr() as *mut _,
                 &mut sig_len,
@@ -406,8 +406,8 @@ impl<'a> Write for Signer<'a> {
 /// A type which can be used to verify the integrity and authenticity
 /// of data given the signature.
 pub struct Verifier<'a> {
-    md_ctx: *mut ffi::EVP_MD_CTX,
-    pctx: *mut ffi::EVP_PKEY_CTX,
+    md_ctx: *mut ffi_10_55::EVP_MD_CTX,
+    pctx: *mut ffi_10_55::EVP_PKEY_CTX,
     pkey_pd: PhantomData<&'a ()>,
 }
 
@@ -462,11 +462,11 @@ impl<'a> Verifier<'a> {
         T: HasPublic,
     {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
             let ctx = cvt_p(EVP_MD_CTX_new())?;
-            let mut pctx: *mut ffi::EVP_PKEY_CTX = ptr::null_mut();
-            let r = ffi::EVP_DigestVerifyInit(
+            let mut pctx: *mut ffi_10_55::EVP_PKEY_CTX = ptr::null_mut();
+            let r = ffi_10_55::EVP_DigestVerifyInit(
                 ctx,
                 &mut pctx,
                 type_.map(|t| t.as_ptr()).unwrap_or(ptr::null()),
@@ -496,7 +496,7 @@ impl<'a> Verifier<'a> {
     pub fn rsa_padding(&self) -> Result<Padding, ErrorStack> {
         unsafe {
             let mut pad = 0;
-            cvt(ffi::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
+            cvt(ffi_10_55::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
                 .map(|_| Padding::from_raw(pad))
         }
     }
@@ -510,7 +510,7 @@ impl<'a> Verifier<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_padding`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_padding.html
     pub fn set_rsa_padding(&mut self, padding: Padding) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_padding(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_padding(
                 self.pctx,
                 padding.as_raw(),
             ))
@@ -527,7 +527,7 @@ impl<'a> Verifier<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_pss_saltlen`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_pss_saltlen.html
     pub fn set_rsa_pss_saltlen(&mut self, len: RsaPssSaltlen) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_pss_saltlen(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_pss_saltlen(
                 self.pctx,
                 len.as_raw(),
             ))
@@ -544,7 +544,7 @@ impl<'a> Verifier<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_mgf1_md`]: https://www.openssl.org/docs/manmaster/man7/RSA-PSS.html
     pub fn set_rsa_mgf1_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_mgf1_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_mgf1_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -562,7 +562,7 @@ impl<'a> Verifier<'a> {
     /// [`EVP_DigestUpdate`]: https://www.openssl.org/docs/manmaster/man3/EVP_DigestInit.html
     pub fn update(&mut self, buf: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_DigestUpdate(
+            cvt(ffi_10_55::EVP_DigestUpdate(
                 self.md_ctx,
                 buf.as_ptr() as *const _,
                 buf.len(),
@@ -599,7 +599,7 @@ impl<'a> Verifier<'a> {
     #[cfg(any(ossl111, boringssl, libressl370))]
     pub fn verify_oneshot(&mut self, signature: &[u8], buf: &[u8]) -> Result<bool, ErrorStack> {
         unsafe {
-            let r = ffi::EVP_DigestVerify(
+            let r = ffi_10_55::EVP_DigestVerify(
                 self.md_ctx,
                 signature.as_ptr() as *const _,
                 signature.len(),
@@ -630,16 +630,16 @@ impl<'a> Write for Verifier<'a> {
 }
 
 #[cfg(not(ossl101))]
-use ffi::EVP_DigestVerifyFinal;
+use ffi_10_55::EVP_DigestVerifyFinal;
 
 #[cfg(ossl101)]
 #[allow(bad_style)]
 unsafe fn EVP_DigestVerifyFinal(
-    ctx: *mut ffi::EVP_MD_CTX,
+    ctx: *mut ffi_10_55::EVP_MD_CTX,
     sigret: *const ::libc::c_uchar,
     siglen: ::libc::size_t,
 ) -> ::libc::c_int {
-    ffi::EVP_DigestVerifyFinal(ctx, sigret as *mut _, siglen)
+    ffi_10_55::EVP_DigestVerifyFinal(ctx, sigret as *mut _, siglen)
 }
 
 #[cfg(test)]

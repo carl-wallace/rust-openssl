@@ -74,7 +74,7 @@ use openssl_macros::corresponds;
 pub struct KeyError(());
 
 /// The key used to encrypt or decrypt cipher blocks.
-pub struct AesKey(ffi::AES_KEY);
+pub struct AesKey(ffi_10_55::AES_KEY);
 
 cfg_if! {
     if #[cfg(boringssl)] {
@@ -98,7 +98,7 @@ impl AesKey {
             assert!(key.len() <= c_int::max_value() as usize / 8);
 
             let mut aes_key = MaybeUninit::uninit();
-            let r = ffi::AES_set_encrypt_key(
+            let r = ffi_10_55::AES_set_encrypt_key(
                 key.as_ptr() as *const _,
                 key.len() as AesBitType * 8,
                 aes_key.as_mut_ptr(),
@@ -122,7 +122,7 @@ impl AesKey {
             assert!(key.len() <= c_int::max_value() as usize / 8);
 
             let mut aes_key = MaybeUninit::uninit();
-            let r = ffi::AES_set_decrypt_key(
+            let r = ffi_10_55::AES_set_decrypt_key(
                 key.as_ptr() as *const _,
                 key.len() as AesBitType * 8,
                 aes_key.as_mut_ptr(),
@@ -161,14 +161,14 @@ impl AesKey {
 pub fn aes_ige(in_: &[u8], out: &mut [u8], key: &AesKey, iv: &mut [u8], mode: Mode) {
     unsafe {
         assert!(in_.len() == out.len());
-        assert!(in_.len() % ffi::AES_BLOCK_SIZE as usize == 0);
-        assert!(iv.len() >= ffi::AES_BLOCK_SIZE as usize * 2);
+        assert!(in_.len() % ffi_10_55::AES_BLOCK_SIZE as usize == 0);
+        assert!(iv.len() >= ffi_10_55::AES_BLOCK_SIZE as usize * 2);
 
         let mode = match mode {
-            Mode::Encrypt => ffi::AES_ENCRYPT,
-            Mode::Decrypt => ffi::AES_DECRYPT,
+            Mode::Encrypt => ffi_10_55::AES_ENCRYPT,
+            Mode::Decrypt => ffi_10_55::AES_DECRYPT,
         };
-        ffi::AES_ige_encrypt(
+        ffi_10_55::AES_ige_encrypt(
             in_.as_ptr() as *const _,
             out.as_mut_ptr() as *mut _,
             in_.len(),
@@ -202,7 +202,7 @@ pub fn wrap_key(
     unsafe {
         assert!(out.len() >= in_.len() + 8); // Ciphertext is 64 bits longer (see 2.2.1)
 
-        let written = ffi::AES_wrap_key(
+        let written = ffi_10_55::AES_wrap_key(
             &key.0 as *const _ as *mut _, // this is safe, the implementation only uses the key as a const pointer.
             iv.as_ref()
                 .map_or(ptr::null(), |iv| iv.as_ptr() as *const _),
@@ -241,7 +241,7 @@ pub fn unwrap_key(
     unsafe {
         assert!(out.len() + 8 <= in_.len());
 
-        let written = ffi::AES_unwrap_key(
+        let written = ffi_10_55::AES_unwrap_key(
             &key.0 as *const _ as *mut _, // this is safe, the implementation only uses the key as a const pointer.
             iv.as_ref()
                 .map_or(ptr::null(), |iv| iv.as_ptr() as *const _),

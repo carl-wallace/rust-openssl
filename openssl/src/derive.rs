@@ -59,7 +59,7 @@ use crate::{cvt, cvt_p};
 use openssl_macros::corresponds;
 
 /// A type used to derive a shared secret between two keys.
-pub struct Deriver<'a>(*mut ffi::EVP_PKEY_CTX, PhantomData<&'a ()>);
+pub struct Deriver<'a>(*mut ffi_10_55::EVP_PKEY_CTX, PhantomData<&'a ()>);
 
 unsafe impl<'a> Sync for Deriver<'a> {}
 unsafe impl<'a> Send for Deriver<'a> {}
@@ -76,9 +76,9 @@ impl<'a> Deriver<'a> {
         T: HasPrivate,
     {
         unsafe {
-            cvt_p(ffi::EVP_PKEY_CTX_new(key.as_ptr(), ptr::null_mut()))
+            cvt_p(ffi_10_55::EVP_PKEY_CTX_new(key.as_ptr(), ptr::null_mut()))
                 .map(|p| Deriver(p, PhantomData))
-                .and_then(|ctx| cvt(ffi::EVP_PKEY_derive_init(ctx.0)).map(|_| ctx))
+                .and_then(|ctx| cvt(ffi_10_55::EVP_PKEY_derive_init(ctx.0)).map(|_| ctx))
         }
     }
 
@@ -88,7 +88,7 @@ impl<'a> Deriver<'a> {
     where
         T: HasPublic,
     {
-        unsafe { cvt(ffi::EVP_PKEY_derive_set_peer(self.0, key.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::EVP_PKEY_derive_set_peer(self.0, key.as_ptr())).map(|_| ()) }
     }
 
     /// Sets the peer key used for secret derivation along with optionally validating the peer public key.
@@ -105,7 +105,7 @@ impl<'a> Deriver<'a> {
         T: HasPublic,
     {
         unsafe {
-            cvt(ffi::EVP_PKEY_derive_set_peer_ex(
+            cvt(ffi_10_55::EVP_PKEY_derive_set_peer_ex(
                 self.0,
                 key.as_ptr(),
                 validate_peer as i32,
@@ -125,7 +125,7 @@ impl<'a> Deriver<'a> {
     pub fn len(&mut self) -> Result<usize, ErrorStack> {
         unsafe {
             let mut len = 0;
-            cvt(ffi::EVP_PKEY_derive(self.0, ptr::null_mut(), &mut len)).map(|_| len)
+            cvt(ffi_10_55::EVP_PKEY_derive(self.0, ptr::null_mut(), &mut len)).map(|_| len)
         }
     }
 
@@ -139,7 +139,7 @@ impl<'a> Deriver<'a> {
     pub fn derive(&mut self, buf: &mut [u8]) -> Result<usize, ErrorStack> {
         let mut len = buf.len();
         unsafe {
-            cvt(ffi::EVP_PKEY_derive(
+            cvt(ffi_10_55::EVP_PKEY_derive(
                 self.0,
                 buf.as_mut_ptr() as *mut _,
                 &mut len,
@@ -166,7 +166,7 @@ impl<'a> Deriver<'a> {
 impl<'a> Drop for Deriver<'a> {
     fn drop(&mut self) {
         unsafe {
-            ffi::EVP_PKEY_CTX_free(self.0);
+            ffi_10_55::EVP_PKEY_CTX_free(self.0);
         }
     }
 }

@@ -88,25 +88,25 @@ impl HkdfMode {
     /// for HKDF will perform an extract followed by an expand operation in one go. The derived key
     /// returned will be the result after the expand operation. The intermediate fixed-length
     /// pseudorandom key K is not returned.
-    pub const EXTRACT_THEN_EXPAND: Self = HkdfMode(ffi::EVP_PKEY_HKDEF_MODE_EXTRACT_AND_EXPAND);
+    pub const EXTRACT_THEN_EXPAND: Self = HkdfMode(ffi_10_55::EVP_PKEY_HKDEF_MODE_EXTRACT_AND_EXPAND);
 
     /// In this mode calling [`derive`][PkeyCtxRef::derive] will just perform the extract operation.
     /// The value returned will be the intermediate fixed-length pseudorandom key K.
     ///
     /// The digest, key and salt values must be set before a key is derived or an error occurs.
-    pub const EXTRACT_ONLY: Self = HkdfMode(ffi::EVP_PKEY_HKDEF_MODE_EXTRACT_ONLY);
+    pub const EXTRACT_ONLY: Self = HkdfMode(ffi_10_55::EVP_PKEY_HKDEF_MODE_EXTRACT_ONLY);
 
     /// In this mode calling [`derive`][PkeyCtxRef::derive] will just perform the expand operation.
     /// The input key should be set to the intermediate fixed-length pseudorandom key K returned
     /// from a previous extract operation.
     ///
     /// The digest, key and info values must be set before a key is derived or an error occurs.
-    pub const EXPAND_ONLY: Self = HkdfMode(ffi::EVP_PKEY_HKDEF_MODE_EXPAND_ONLY);
+    pub const EXPAND_ONLY: Self = HkdfMode(ffi_10_55::EVP_PKEY_HKDEF_MODE_EXPAND_ONLY);
 }
 
 generic_foreign_type_and_impl_send_sync! {
-    type CType = ffi::EVP_PKEY_CTX;
-    fn drop = ffi::EVP_PKEY_CTX_free;
+    type CType = ffi_10_55::EVP_PKEY_CTX;
+    fn drop = ffi_10_55::EVP_PKEY_CTX_free;
 
     /// A context object which can perform asymmetric cryptography operations.
     pub struct PkeyCtx<T>;
@@ -120,7 +120,7 @@ impl<T> PkeyCtx<T> {
     #[inline]
     pub fn new(pkey: &PKeyRef<T>) -> Result<Self, ErrorStack> {
         unsafe {
-            let ptr = cvt_p(ffi::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
+            let ptr = cvt_p(ffi_10_55::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
             Ok(PkeyCtx::from_ptr(ptr))
         }
     }
@@ -132,7 +132,7 @@ impl PkeyCtx<()> {
     #[inline]
     pub fn new_id(id: Id) -> Result<Self, ErrorStack> {
         unsafe {
-            let ptr = cvt_p(ffi::EVP_PKEY_CTX_new_id(id.as_raw(), ptr::null_mut()))?;
+            let ptr = cvt_p(ffi_10_55::EVP_PKEY_CTX_new_id(id.as_raw(), ptr::null_mut()))?;
             Ok(PkeyCtx::from_ptr(ptr))
         }
     }
@@ -147,7 +147,7 @@ where
     #[inline]
     pub fn encrypt_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_encrypt_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_encrypt_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -158,7 +158,7 @@ where
     #[inline]
     pub fn verify_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_verify_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_verify_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -173,7 +173,7 @@ where
     pub fn encrypt(&mut self, from: &[u8], to: Option<&mut [u8]>) -> Result<usize, ErrorStack> {
         let mut written = to.as_ref().map_or(0, |b| b.len());
         unsafe {
-            cvt(ffi::EVP_PKEY_encrypt(
+            cvt(ffi_10_55::EVP_PKEY_encrypt(
                 self.as_ptr(),
                 to.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut written,
@@ -209,7 +209,7 @@ where
     #[inline]
     pub fn verify(&mut self, data: &[u8], sig: &[u8]) -> Result<bool, ErrorStack> {
         unsafe {
-            let r = cvt_n(ffi::EVP_PKEY_verify(
+            let r = cvt_n(ffi_10_55::EVP_PKEY_verify(
                 self.as_ptr(),
                 sig.as_ptr(),
                 sig.len(),
@@ -230,7 +230,7 @@ where
     #[inline]
     pub fn decrypt_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_decrypt_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_decrypt_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -241,7 +241,7 @@ where
     #[inline]
     pub fn sign_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_sign_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_sign_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -254,7 +254,7 @@ where
         U: HasPublic,
     {
         unsafe {
-            cvt(ffi::EVP_PKEY_derive_set_peer(self.as_ptr(), key.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_derive_set_peer(self.as_ptr(), key.as_ptr()))?;
         }
 
         Ok(())
@@ -269,7 +269,7 @@ where
     pub fn decrypt(&mut self, from: &[u8], to: Option<&mut [u8]>) -> Result<usize, ErrorStack> {
         let mut written = to.as_ref().map_or(0, |b| b.len());
         unsafe {
-            cvt(ffi::EVP_PKEY_decrypt(
+            cvt(ffi_10_55::EVP_PKEY_decrypt(
                 self.as_ptr(),
                 to.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut written,
@@ -305,7 +305,7 @@ where
     pub fn sign(&mut self, data: &[u8], sig: Option<&mut [u8]>) -> Result<usize, ErrorStack> {
         let mut written = sig.as_ref().map_or(0, |b| b.len());
         unsafe {
-            cvt(ffi::EVP_PKEY_sign(
+            cvt(ffi_10_55::EVP_PKEY_sign(
                 self.as_ptr(),
                 sig.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut written,
@@ -334,7 +334,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn derive_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_derive_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_derive_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -345,7 +345,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn keygen_init(&mut self) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_keygen_init(self.as_ptr()))?;
+            cvt(ffi_10_55::EVP_PKEY_keygen_init(self.as_ptr()))?;
         }
 
         Ok(())
@@ -359,7 +359,7 @@ impl<T> PkeyCtxRef<T> {
     pub fn rsa_padding(&self) -> Result<Padding, ErrorStack> {
         let mut pad = 0;
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_get_rsa_padding(self.as_ptr(), &mut pad))?;
+            cvt(ffi_10_55::EVP_PKEY_CTX_get_rsa_padding(self.as_ptr(), &mut pad))?;
         }
 
         Ok(Padding::from_raw(pad))
@@ -372,7 +372,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_rsa_padding(&mut self, padding: Padding) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_padding(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_padding(
                 self.as_ptr(),
                 padding.as_raw(),
             ))?;
@@ -388,7 +388,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_rsa_mgf1_md(&mut self, md: &MdRef) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_mgf1_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_mgf1_md(
                 self.as_ptr(),
                 md.as_ptr(),
             ))?;
@@ -405,7 +405,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_rsa_oaep_md(&mut self, md: &MdRef) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_oaep_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_oaep_md(
                 self.as_ptr(),
                 md.as_ptr() as *mut _,
             ))?;
@@ -424,16 +424,16 @@ impl<T> PkeyCtxRef<T> {
         let len = LenType::try_from(label.len()).unwrap();
 
         unsafe {
-            let p = ffi::OPENSSL_malloc(label.len() as _);
+            let p = ffi_10_55::OPENSSL_malloc(label.len() as _);
             ptr::copy_nonoverlapping(label.as_ptr(), p as *mut _, label.len());
 
-            let r = cvt(ffi::EVP_PKEY_CTX_set0_rsa_oaep_label(
+            let r = cvt(ffi_10_55::EVP_PKEY_CTX_set0_rsa_oaep_label(
                 self.as_ptr(),
                 p as *mut _,
                 len,
             ));
             if r.is_err() {
-                ffi::OPENSSL_free(p);
+                ffi_10_55::OPENSSL_free(p);
             }
             r?;
         }
@@ -447,11 +447,11 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_keygen_cipher(&mut self, cipher: &CipherRef) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_ctrl(
+            cvt(ffi_10_55::EVP_PKEY_CTX_ctrl(
                 self.as_ptr(),
                 -1,
-                ffi::EVP_PKEY_OP_KEYGEN,
-                ffi::EVP_PKEY_CTRL_CIPHER,
+                ffi_10_55::EVP_PKEY_OP_KEYGEN,
+                ffi_10_55::EVP_PKEY_CTRL_CIPHER,
                 0,
                 cipher.as_ptr() as *mut _,
             ))?;
@@ -468,11 +468,11 @@ impl<T> PkeyCtxRef<T> {
         let len = c_int::try_from(key.len()).unwrap();
 
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_ctrl(
+            cvt(ffi_10_55::EVP_PKEY_CTX_ctrl(
                 self.as_ptr(),
                 -1,
-                ffi::EVP_PKEY_OP_KEYGEN,
-                ffi::EVP_PKEY_CTRL_SET_MAC_KEY,
+                ffi_10_55::EVP_PKEY_OP_KEYGEN,
+                ffi_10_55::EVP_PKEY_CTRL_SET_MAC_KEY,
                 len,
                 key.as_ptr() as *mut _,
             ))?;
@@ -489,7 +489,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_hkdf_md(&mut self, digest: &MdRef) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_hkdf_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_hkdf_md(
                 self.as_ptr(),
                 digest.as_ptr(),
             ))?;
@@ -512,7 +512,7 @@ impl<T> PkeyCtxRef<T> {
     #[inline]
     pub fn set_hkdf_mode(&mut self, mode: HkdfMode) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_hkdf_mode(self.as_ptr(), mode.0))?;
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_hkdf_mode(self.as_ptr(), mode.0))?;
         }
 
         Ok(())
@@ -536,7 +536,7 @@ impl<T> PkeyCtxRef<T> {
         let len = key.len();
 
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set1_hkdf_key(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set1_hkdf_key(
                 self.as_ptr(),
                 key.as_ptr(),
                 len,
@@ -561,7 +561,7 @@ impl<T> PkeyCtxRef<T> {
         let len = salt.len();
 
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set1_hkdf_salt(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set1_hkdf_salt(
                 self.as_ptr(),
                 salt.as_ptr(),
                 len,
@@ -586,7 +586,7 @@ impl<T> PkeyCtxRef<T> {
         let len = info.len();
 
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_add1_hkdf_info(
+            cvt(ffi_10_55::EVP_PKEY_CTX_add1_hkdf_info(
                 self.as_ptr(),
                 info.as_ptr(),
                 len,
@@ -603,7 +603,7 @@ impl<T> PkeyCtxRef<T> {
     pub fn derive(&mut self, buf: Option<&mut [u8]>) -> Result<usize, ErrorStack> {
         let mut len = buf.as_ref().map_or(0, |b| b.len());
         unsafe {
-            cvt(ffi::EVP_PKEY_derive(
+            cvt(ffi_10_55::EVP_PKEY_derive(
                 self.as_ptr(),
                 buf.map_or(ptr::null_mut(), |b| b.as_mut_ptr()),
                 &mut len,
@@ -629,7 +629,7 @@ impl<T> PkeyCtxRef<T> {
     pub fn keygen(&mut self) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
             let mut key = ptr::null_mut();
-            cvt(ffi::EVP_PKEY_keygen(self.as_ptr(), &mut key))?;
+            cvt(ffi_10_55::EVP_PKEY_keygen(self.as_ptr(), &mut key))?;
             Ok(PKey::from_ptr(key))
         }
     }

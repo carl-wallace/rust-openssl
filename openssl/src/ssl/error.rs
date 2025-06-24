@@ -14,29 +14,29 @@ pub struct ErrorCode(c_int);
 
 impl ErrorCode {
     /// The SSL session has been closed.
-    pub const ZERO_RETURN: ErrorCode = ErrorCode(ffi::SSL_ERROR_ZERO_RETURN);
+    pub const ZERO_RETURN: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_ZERO_RETURN);
 
     /// An attempt to read data from the underlying socket returned `WouldBlock`.
     ///
     /// Wait for read readiness and retry the operation.
-    pub const WANT_READ: ErrorCode = ErrorCode(ffi::SSL_ERROR_WANT_READ);
+    pub const WANT_READ: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_WANT_READ);
 
     /// An attempt to write data to the underlying socket returned `WouldBlock`.
     ///
     /// Wait for write readiness and retry the operation.
-    pub const WANT_WRITE: ErrorCode = ErrorCode(ffi::SSL_ERROR_WANT_WRITE);
+    pub const WANT_WRITE: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_WANT_WRITE);
 
     /// A non-recoverable IO error occurred.
-    pub const SYSCALL: ErrorCode = ErrorCode(ffi::SSL_ERROR_SYSCALL);
+    pub const SYSCALL: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_SYSCALL);
 
     /// An error occurred in the SSL library.
-    pub const SSL: ErrorCode = ErrorCode(ffi::SSL_ERROR_SSL);
+    pub const SSL: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_SSL);
 
     /// The client hello callback indicated that it needed to be retried.
     ///
     /// Requires OpenSSL 1.1.1 or newer.
     #[cfg(ossl111)]
-    pub const WANT_CLIENT_HELLO_CB: ErrorCode = ErrorCode(ffi::SSL_ERROR_WANT_CLIENT_HELLO_CB);
+    pub const WANT_CLIENT_HELLO_CB: ErrorCode = ErrorCode(ffi_10_55::SSL_ERROR_WANT_CLIENT_HELLO_CB);
 
     pub fn from_raw(raw: c_int) -> ErrorCode {
         ErrorCode(raw)

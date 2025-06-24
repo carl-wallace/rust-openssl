@@ -17,22 +17,22 @@ use std::ptr;
 
 cfg_if! {
     if #[cfg(any(boringssl, ossl110, libressl273))] {
-        use ffi::{EVP_CIPHER_block_size, EVP_CIPHER_iv_length, EVP_CIPHER_key_length};
+        use ffi_10_55::{EVP_CIPHER_block_size, EVP_CIPHER_iv_length, EVP_CIPHER_key_length};
     } else {
         use libc::c_int;
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_iv_length(ptr: *const ffi::EVP_CIPHER) -> c_int {
+        pub unsafe fn EVP_CIPHER_iv_length(ptr: *const ffi_10_55::EVP_CIPHER) -> c_int {
             (*ptr).iv_len
         }
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_block_size(ptr: *const ffi::EVP_CIPHER) -> c_int {
+        pub unsafe fn EVP_CIPHER_block_size(ptr: *const ffi_10_55::EVP_CIPHER) -> c_int {
             (*ptr).block_size
         }
 
         #[allow(bad_style)]
-        pub unsafe fn EVP_CIPHER_key_length(ptr: *const ffi::EVP_CIPHER) -> c_int {
+        pub unsafe fn EVP_CIPHER_key_length(ptr: *const ffi_10_55::EVP_CIPHER) -> c_int {
             (*ptr).key_len
         }
     }
@@ -43,19 +43,19 @@ cfg_if! {
         use foreign_types::ForeignType;
         use std::ops::{Deref, DerefMut};
 
-        type Inner = *mut ffi::EVP_CIPHER;
+        type Inner = *mut ffi_10_55::EVP_CIPHER;
 
         impl Drop for Cipher {
             #[inline]
             fn drop(&mut self) {
                 unsafe {
-                    ffi::EVP_CIPHER_free(self.as_ptr());
+                    ffi_10_55::EVP_CIPHER_free(self.as_ptr());
                 }
             }
         }
 
         impl ForeignType for Cipher {
-            type CType = ffi::EVP_CIPHER;
+            type CType = ffi_10_55::EVP_CIPHER;
             type Ref = CipherRef;
 
             #[inline]
@@ -104,7 +104,7 @@ impl Cipher {
     #[corresponds(EVP_get_cipherbynid)]
     pub fn from_nid(nid: Nid) -> Option<&'static CipherRef> {
         unsafe {
-            let ptr = ffi::EVP_get_cipherbyname(ffi::OBJ_nid2sn(nid.as_raw()));
+            let ptr = ffi_10_55::EVP_get_cipherbyname(ffi_10_55::OBJ_nid2sn(nid.as_raw()));
             if ptr.is_null() {
                 None
             } else {
@@ -127,7 +127,7 @@ impl Cipher {
         let properties = properties.map(|s| CString::new(s).unwrap());
 
         unsafe {
-            let ptr = cvt_p(ffi::EVP_CIPHER_fetch(
+            let ptr = cvt_p(ffi_10_55::EVP_CIPHER_fetch(
                 ctx.map_or(ptr::null_mut(), ForeignTypeRef::as_ptr),
                 algorithm.as_ptr(),
                 properties.map_or(ptr::null_mut(), |s| s.as_ptr()),
@@ -138,304 +138,304 @@ impl Cipher {
     }
 
     pub fn aes_128_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_ecb() as *mut _) }
     }
 
     pub fn aes_128_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_cbc() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_xts() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_xts() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_xts() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_ctr() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_ctr() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_ctr() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_cfb1() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_cfb1() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_cfb1() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_cfb128() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_cfb8() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_cfb8() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_cfb8() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_gcm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_gcm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_gcm() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_ccm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_ccm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_ccm() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_128_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_ofb() as *mut _) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(ossl110)]
     pub fn aes_128_ocb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_128_ocb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_128_ocb() as *mut _) }
     }
 
     pub fn aes_192_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_ecb() as *mut _) }
     }
 
     pub fn aes_192_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_cbc() as *mut _) }
     }
 
     pub fn aes_192_ctr() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_ctr() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_ctr() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_cfb1() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_cfb1() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_cfb1() as *mut _) }
     }
 
     pub fn aes_192_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_cfb128() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_cfb8() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_cfb8() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_cfb8() as *mut _) }
     }
 
     pub fn aes_192_gcm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_gcm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_gcm() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_192_ccm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_ccm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_ccm() as *mut _) }
     }
 
     pub fn aes_192_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_ofb() as *mut _) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(ossl110)]
     pub fn aes_192_ocb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_192_ocb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_192_ocb() as *mut _) }
     }
 
     pub fn aes_256_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_ecb() as *mut _) }
     }
 
     pub fn aes_256_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_cbc() as *mut _) }
     }
 
     pub fn aes_256_ctr() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_ctr() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_ctr() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_cfb1() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_cfb1() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_cfb1() as *mut _) }
     }
 
     pub fn aes_256_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_cfb128() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_cfb8() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_cfb8() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_cfb8() as *mut _) }
     }
 
     pub fn aes_256_gcm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_gcm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_gcm() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn aes_256_ccm() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_ccm() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_ccm() as *mut _) }
     }
 
     pub fn aes_256_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_ofb() as *mut _) }
     }
 
     /// Requires OpenSSL 1.1.0 or newer.
     #[cfg(ossl110)]
     pub fn aes_256_ocb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_aes_256_ocb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_aes_256_ocb() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     pub fn bf_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_bf_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_bf_cbc() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     pub fn bf_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_bf_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_bf_ecb() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     #[cfg(not(boringssl))]
     pub fn bf_cfb64() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_bf_cfb64() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_bf_cfb64() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_BF"))]
     #[cfg(not(boringssl))]
     pub fn bf_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_bf_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_bf_ofb() as *mut _) }
     }
 
     pub fn des_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_des_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_des_cbc() as *mut _) }
     }
 
     pub fn des_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_des_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_des_ecb() as *mut _) }
     }
 
     pub fn des_ede3() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_des_ede3() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_des_ede3() as *mut _) }
     }
 
     pub fn des_ede3_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_des_ede3_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_des_ede3_cbc() as *mut _) }
     }
 
     #[cfg(not(boringssl))]
     pub fn des_ede3_cfb64() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_des_ede3_cfb64() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_des_ede3_cfb64() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_RC4"))]
     pub fn rc4() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_rc4() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_rc4() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia128_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_128_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_128_cfb128() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia128_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_128_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_128_ecb() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia192_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_192_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_192_cfb128() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia192_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_192_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_192_ecb() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia256_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_256_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_256_cfb128() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAMELLIA")))]
     pub fn camellia256_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_camellia_256_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_camellia_256_ecb() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAST")))]
     pub fn cast5_cfb64() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_cast5_cfb64() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_cast5_cfb64() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_CAST")))]
     pub fn cast5_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_cast5_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_cast5_ecb() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_IDEA")))]
     pub fn idea_cfb64() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_idea_cfb64() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_idea_cfb64() as *mut _) }
     }
 
     #[cfg(not(any(boringssl, osslconf = "OPENSSL_NO_IDEA")))]
     pub fn idea_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_idea_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_idea_ecb() as *mut _) }
     }
 
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_CHACHA")))]
     pub fn chacha20() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_chacha20() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_chacha20() as *mut _) }
     }
 
     #[cfg(all(ossl110, not(osslconf = "OPENSSL_NO_CHACHA")))]
     pub fn chacha20_poly1305() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_chacha20_poly1305() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_chacha20_poly1305() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_SEED"))]
     #[cfg(not(boringssl))]
     pub fn seed_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_seed_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_seed_cbc() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_SEED"))]
     #[cfg(not(boringssl))]
     pub fn seed_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_seed_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_seed_cfb128() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_SEED"))]
     #[cfg(not(boringssl))]
     pub fn seed_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_seed_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_seed_ecb() as *mut _) }
     }
 
     #[cfg(not(osslconf = "OPENSSL_NO_SEED"))]
     #[cfg(not(boringssl))]
     pub fn seed_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_seed_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_seed_ofb() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ecb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_sm4_ecb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_sm4_ecb() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_cbc() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_sm4_cbc() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_sm4_cbc() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ctr() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_sm4_ctr() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_sm4_ctr() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_cfb128() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_sm4_cfb128() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_sm4_cfb128() as *mut _) }
     }
 
     #[cfg(all(any(ossl111, libressl291), not(osslconf = "OPENSSL_NO_SM4")))]
     pub fn sm4_ofb() -> &'static CipherRef {
-        unsafe { CipherRef::from_ptr(ffi::EVP_sm4_ofb() as *mut _) }
+        unsafe { CipherRef::from_ptr(ffi_10_55::EVP_sm4_ofb() as *mut _) }
     }
 }
 
@@ -443,7 +443,7 @@ impl Cipher {
 pub struct CipherRef(Opaque);
 
 impl ForeignTypeRef for CipherRef {
-    type CType = ffi::EVP_CIPHER;
+    type CType = ffi_10_55::EVP_CIPHER;
 }
 
 unsafe impl Sync for CipherRef {}
@@ -453,7 +453,7 @@ impl CipherRef {
     /// Returns the cipher's Nid.
     #[corresponds(EVP_CIPHER_nid)]
     pub fn nid(&self) -> Nid {
-        let nid = unsafe { ffi::EVP_CIPHER_nid(self.as_ptr()) };
+        let nid = unsafe { ffi_10_55::EVP_CIPHER_nid(self.as_ptr()) };
         Nid::from_raw(nid)
     }
 

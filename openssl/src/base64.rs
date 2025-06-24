@@ -22,7 +22,7 @@ pub fn encode_block(src: &[u8]) -> String {
     // `EVP_EncodeBlock` will write only single byte ASCII characters.
     // `EVP_EncodeBlock` will only write to not read from `out`.
     unsafe {
-        let out_len = ffi::EVP_EncodeBlock(out.as_mut_ptr(), src.as_ptr(), src_len);
+        let out_len = ffi_10_55::EVP_EncodeBlock(out.as_mut_ptr(), src.as_ptr(), src_len);
         out.set_len(out_len as usize);
         String::from_utf8_unchecked(out)
     }
@@ -54,7 +54,7 @@ pub fn decode_block(src: &str) -> Result<Vec<u8>, ErrorStack> {
     // leading and trailing whitespace, but never more.
     // `EVP_DecodeBlock` will only write to not read from `out`.
     unsafe {
-        let out_len = cvt_n(ffi::EVP_DecodeBlock(
+        let out_len = cvt_n(ffi_10_55::EVP_DecodeBlock(
             out.as_mut_ptr(),
             src.as_ptr(),
             src_len,

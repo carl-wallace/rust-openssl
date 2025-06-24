@@ -15,8 +15,8 @@ use crate::{cvt_n, cvt_p, LenType};
 use openssl_macros::corresponds;
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::ECDSA_SIG;
-    fn drop = ffi::ECDSA_SIG_free;
+    type CType = ffi_10_55::ECDSA_SIG;
+    fn drop = ffi_10_55::ECDSA_SIG_free;
 
     /// A low level interface to ECDSA.
     pub struct EcdsaSig;
@@ -33,7 +33,7 @@ impl EcdsaSig {
     {
         unsafe {
             assert!(data.len() <= c_int::max_value() as usize);
-            let sig = cvt_p(ffi::ECDSA_do_sign(
+            let sig = cvt_p(ffi_10_55::ECDSA_do_sign(
                 data.as_ptr(),
                 data.len() as LenType,
                 eckey.as_ptr(),
@@ -46,7 +46,7 @@ impl EcdsaSig {
     #[corresponds(ECDSA_SIG_set0)]
     pub fn from_private_components(r: BigNum, s: BigNum) -> Result<EcdsaSig, ErrorStack> {
         unsafe {
-            let sig = cvt_p(ffi::ECDSA_SIG_new())?;
+            let sig = cvt_p(ffi_10_55::ECDSA_SIG_new())?;
             ECDSA_SIG_set0(sig, r.as_ptr(), s.as_ptr());
             mem::forget((r, s));
             Ok(EcdsaSig::from_ptr(sig))
@@ -58,7 +58,7 @@ impl EcdsaSig {
         #[corresponds(d2i_ECDSA_SIG)]
         from_der,
         EcdsaSig,
-        ffi::d2i_ECDSA_SIG
+        ffi_10_55::d2i_ECDSA_SIG
     }
 }
 
@@ -67,7 +67,7 @@ impl EcdsaSigRef {
         /// Serializes the ECDSA signature into a DER-encoded ECDSASignature structure.
         #[corresponds(i2d_ECDSA_SIG)]
         to_der,
-        ffi::i2d_ECDSA_SIG
+        ffi_10_55::i2d_ECDSA_SIG
     }
 
     /// Verifies if the signature is a valid ECDSA signature using the given public key.
@@ -78,7 +78,7 @@ impl EcdsaSigRef {
     {
         unsafe {
             assert!(data.len() <= c_int::max_value() as usize);
-            cvt_n(ffi::ECDSA_do_verify(
+            cvt_n(ffi_10_55::ECDSA_do_verify(
                 data.as_ptr(),
                 data.len() as LenType,
                 self.as_ptr(),
@@ -111,19 +111,19 @@ impl EcdsaSigRef {
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl273, boringssl))] {
-        use ffi::{ECDSA_SIG_set0, ECDSA_SIG_get0};
+        use ffi_10_55::{ECDSA_SIG_set0, ECDSA_SIG_get0};
     } else {
         #[allow(bad_style)]
         unsafe fn ECDSA_SIG_set0(
-            sig: *mut ffi::ECDSA_SIG,
-            r: *mut ffi::BIGNUM,
-            s: *mut ffi::BIGNUM,
+            sig: *mut ffi_10_55::ECDSA_SIG,
+            r: *mut ffi_10_55::BIGNUM,
+            s: *mut ffi_10_55::BIGNUM,
         ) -> c_int {
             if r.is_null() || s.is_null() {
                 return 0;
             }
-            ffi::BN_clear_free((*sig).r);
-            ffi::BN_clear_free((*sig).s);
+            ffi_10_55::BN_clear_free((*sig).r);
+            ffi_10_55::BN_clear_free((*sig).s);
             (*sig).r = r;
             (*sig).s = s;
             1
@@ -131,9 +131,9 @@ cfg_if! {
 
         #[allow(bad_style)]
         unsafe fn ECDSA_SIG_get0(
-            sig: *const ffi::ECDSA_SIG,
-            pr: *mut *const ffi::BIGNUM,
-            ps: *mut *const ffi::BIGNUM)
+            sig: *const ffi_10_55::ECDSA_SIG,
+            pr: *mut *const ffi_10_55::BIGNUM,
+            ps: *mut *const ffi_10_55::BIGNUM)
         {
             if !pr.is_null() {
                 (*pr) = (*sig).r;

@@ -7,19 +7,19 @@ use std::slice;
 use crate::cvt_p;
 use crate::error::ErrorStack;
 
-pub struct MemBioSlice<'a>(*mut ffi::BIO, PhantomData<&'a [u8]>);
+pub struct MemBioSlice<'a>(*mut ffi_10_55::BIO, PhantomData<&'a [u8]>);
 
 impl<'a> Drop for MemBioSlice<'a> {
     fn drop(&mut self) {
         unsafe {
-            ffi::BIO_free_all(self.0);
+            ffi_10_55::BIO_free_all(self.0);
         }
     }
 }
 
 impl<'a> MemBioSlice<'a> {
     pub fn new(buf: &'a [u8]) -> Result<MemBioSlice<'a>, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
         assert!(buf.len() <= c_int::max_value() as usize);
         let bio = unsafe {
@@ -32,54 +32,54 @@ impl<'a> MemBioSlice<'a> {
         Ok(MemBioSlice(bio, PhantomData))
     }
 
-    pub fn as_ptr(&self) -> *mut ffi::BIO {
+    pub fn as_ptr(&self) -> *mut ffi_10_55::BIO {
         self.0
     }
 }
 
-pub struct MemBio(*mut ffi::BIO);
+pub struct MemBio(*mut ffi_10_55::BIO);
 
 impl Drop for MemBio {
     fn drop(&mut self) {
         unsafe {
-            ffi::BIO_free_all(self.0);
+            ffi_10_55::BIO_free_all(self.0);
         }
     }
 }
 
 impl MemBio {
     pub fn new() -> Result<MemBio, ErrorStack> {
-        ffi::init();
+        ffi_10_55::init();
 
-        let bio = unsafe { cvt_p(ffi::BIO_new(ffi::BIO_s_mem()))? };
+        let bio = unsafe { cvt_p(ffi_10_55::BIO_new(ffi_10_55::BIO_s_mem()))? };
         Ok(MemBio(bio))
     }
 
-    pub fn as_ptr(&self) -> *mut ffi::BIO {
+    pub fn as_ptr(&self) -> *mut ffi_10_55::BIO {
         self.0
     }
 
     pub fn get_buf(&self) -> &[u8] {
         unsafe {
             let mut ptr = ptr::null_mut();
-            let len = ffi::BIO_get_mem_data(self.0, &mut ptr);
+            let len = ffi_10_55::BIO_get_mem_data(self.0, &mut ptr);
             slice::from_raw_parts(ptr as *const _ as *const _, len as usize)
         }
     }
 
     #[cfg(not(boringssl))]
-    pub unsafe fn from_ptr(bio: *mut ffi::BIO) -> MemBio {
+    pub unsafe fn from_ptr(bio: *mut ffi_10_55::BIO) -> MemBio {
         MemBio(bio)
     }
 }
 
 cfg_if! {
     if #[cfg(any(ossl102, boringssl))] {
-        use ffi::BIO_new_mem_buf;
+        use ffi_10_55::BIO_new_mem_buf;
     } else {
         #[allow(bad_style)]
-        unsafe fn BIO_new_mem_buf(buf: *const ::libc::c_void, len: ::libc::c_int) -> *mut ffi::BIO {
-            ffi::BIO_new_mem_buf(buf as *mut _, len)
+        unsafe fn BIO_new_mem_buf(buf: *const ::libc::c_void, len: ::libc::c_int) -> *mut ffi_10_55::BIO {
+            ffi_10_55::BIO_new_mem_buf(buf as *mut _, len)
         }
     }
 }

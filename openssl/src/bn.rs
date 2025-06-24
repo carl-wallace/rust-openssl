@@ -38,15 +38,15 @@ use openssl_macros::corresponds;
 
 cfg_if! {
     if #[cfg(any(ossl110, libressl350))] {
-        use ffi::{
+        use ffi_10_55::{
             BN_get_rfc2409_prime_1024, BN_get_rfc2409_prime_768, BN_get_rfc3526_prime_1536,
             BN_get_rfc3526_prime_2048, BN_get_rfc3526_prime_3072, BN_get_rfc3526_prime_4096,
             BN_get_rfc3526_prime_6144, BN_get_rfc3526_prime_8192, BN_is_negative,
         };
     } else if #[cfg(boringssl)] {
-        use ffi::BN_is_negative;
+        use ffi_10_55::BN_is_negative;
     } else {
-        use ffi::{
+        use ffi_10_55::{
             get_rfc2409_prime_1024 as BN_get_rfc2409_prime_1024,
             get_rfc2409_prime_768 as BN_get_rfc2409_prime_768,
             get_rfc3526_prime_1536 as BN_get_rfc3526_prime_1536,
@@ -58,7 +58,7 @@ cfg_if! {
         };
 
         #[allow(bad_style)]
-        unsafe fn BN_is_negative(bn: *const ffi::BIGNUM) -> c_int {
+        unsafe fn BN_is_negative(bn: *const ffi_10_55::BIGNUM) -> c_int {
             (*bn).neg
         }
     }
@@ -82,8 +82,8 @@ impl MsbOption {
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::BN_CTX;
-    fn drop = ffi::BN_CTX_free;
+    type CType = ffi_10_55::BN_CTX;
+    fn drop = ffi_10_55::BN_CTX_free;
 
     /// Temporary storage for BigNums on the secure heap
     ///
@@ -104,8 +104,8 @@ impl BigNumContext {
     #[corresponds(BN_CTX_new)]
     pub fn new() -> Result<BigNumContext, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::BN_CTX_new()).map(BigNumContext)
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::BN_CTX_new()).map(BigNumContext)
         }
     }
 
@@ -114,15 +114,15 @@ impl BigNumContext {
     #[cfg(ossl110)]
     pub fn new_secure() -> Result<BigNumContext, ErrorStack> {
         unsafe {
-            ffi::init();
-            cvt_p(ffi::BN_CTX_secure_new()).map(BigNumContext)
+            ffi_10_55::init();
+            cvt_p(ffi_10_55::BN_CTX_secure_new()).map(BigNumContext)
         }
     }
 }
 
 foreign_type_and_impl_send_sync! {
-    type CType = ffi::BIGNUM;
-    fn drop = ffi::BN_free;
+    type CType = ffi_10_55::BIGNUM;
+    fn drop = ffi_10_55::BN_free;
 
     /// Dynamically sized large number implementation
     ///
@@ -160,25 +160,25 @@ impl BigNumRef {
     /// This can be used to destroy sensitive data such as keys when they are no longer needed.
     #[corresponds(BN_clear)]
     pub fn clear(&mut self) {
-        unsafe { ffi::BN_clear(self.as_ptr()) }
+        unsafe { ffi_10_55::BN_clear(self.as_ptr()) }
     }
 
     /// Adds a `u32` to `self`.
     #[corresponds(BN_add_word)]
     pub fn add_word(&mut self, w: u32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_add_word(self.as_ptr(), w as ffi::BN_ULONG)).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_add_word(self.as_ptr(), w as ffi_10_55::BN_ULONG)).map(|_| ()) }
     }
 
     /// Subtracts a `u32` from `self`.
     #[corresponds(BN_sub_word)]
     pub fn sub_word(&mut self, w: u32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_sub_word(self.as_ptr(), w as ffi::BN_ULONG)).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_sub_word(self.as_ptr(), w as ffi_10_55::BN_ULONG)).map(|_| ()) }
     }
 
     /// Multiplies a `u32` by `self`.
     #[corresponds(BN_mul_word)]
     pub fn mul_word(&mut self, w: u32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_mul_word(self.as_ptr(), w as ffi::BN_ULONG)).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_mul_word(self.as_ptr(), w as ffi_10_55::BN_ULONG)).map(|_| ()) }
     }
 
     /// Divides `self` by a `u32`, returning the remainder.
@@ -186,8 +186,8 @@ impl BigNumRef {
     #[allow(clippy::useless_conversion)]
     pub fn div_word(&mut self, w: u32) -> Result<u64, ErrorStack> {
         unsafe {
-            let r = ffi::BN_div_word(self.as_ptr(), w.into());
-            if r == ffi::BN_ULONG::max_value() {
+            let r = ffi_10_55::BN_div_word(self.as_ptr(), w.into());
+            if r == ffi_10_55::BN_ULONG::max_value() {
                 Err(ErrorStack::get())
             } else {
                 Ok(r.into())
@@ -200,8 +200,8 @@ impl BigNumRef {
     #[allow(clippy::useless_conversion)]
     pub fn mod_word(&self, w: u32) -> Result<u64, ErrorStack> {
         unsafe {
-            let r = ffi::BN_mod_word(self.as_ptr(), w.into());
-            if r == ffi::BN_ULONG::max_value() {
+            let r = ffi_10_55::BN_mod_word(self.as_ptr(), w.into());
+            if r == ffi_10_55::BN_ULONG::max_value() {
                 Err(ErrorStack::get())
             } else {
                 Ok(r.into())
@@ -213,14 +213,14 @@ impl BigNumRef {
     /// number less than `self` in `rnd`.
     #[corresponds(BN_rand_range)]
     pub fn rand_range(&self, rnd: &mut BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_rand_range(rnd.as_ptr(), self.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_rand_range(rnd.as_ptr(), self.as_ptr())).map(|_| ()) }
     }
 
     /// The cryptographically weak counterpart to `rand_in_range`.
     #[cfg(not(osslconf = "OPENSSL_NO_DEPRECATED_3_0"))]
     #[corresponds(BN_pseudo_rand_range)]
     pub fn pseudo_rand_range(&self, rnd: &mut BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_pseudo_rand_range(rnd.as_ptr(), self.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_pseudo_rand_range(rnd.as_ptr(), self.as_ptr())).map(|_| ()) }
     }
 
     /// Sets bit `n`. Equivalent to `self |= (1 << n)`.
@@ -229,7 +229,7 @@ impl BigNumRef {
     #[corresponds(BN_set_bit)]
     #[allow(clippy::useless_conversion)]
     pub fn set_bit(&mut self, n: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_set_bit(self.as_ptr(), n.into())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_set_bit(self.as_ptr(), n.into())).map(|_| ()) }
     }
 
     /// Clears bit `n`, setting it to 0. Equivalent to `self &= ~(1 << n)`.
@@ -238,14 +238,14 @@ impl BigNumRef {
     #[corresponds(BN_clear_bit)]
     #[allow(clippy::useless_conversion)]
     pub fn clear_bit(&mut self, n: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_clear_bit(self.as_ptr(), n.into())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_clear_bit(self.as_ptr(), n.into())).map(|_| ()) }
     }
 
     /// Returns `true` if the `n`th bit of `self` is set to 1, `false` otherwise.
     #[corresponds(BN_is_bit_set)]
     #[allow(clippy::useless_conversion)]
     pub fn is_bit_set(&self, n: i32) -> bool {
-        unsafe { ffi::BN_is_bit_set(self.as_ptr(), n.into()) == 1 }
+        unsafe { ffi_10_55::BN_is_bit_set(self.as_ptr(), n.into()) == 1 }
     }
 
     /// Truncates `self` to the lowest `n` bits.
@@ -254,19 +254,19 @@ impl BigNumRef {
     #[corresponds(BN_mask_bits)]
     #[allow(clippy::useless_conversion)]
     pub fn mask_bits(&mut self, n: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_mask_bits(self.as_ptr(), n.into())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_mask_bits(self.as_ptr(), n.into())).map(|_| ()) }
     }
 
     /// Places `a << 1` in `self`.  Equivalent to `self * 2`.
     #[corresponds(BN_lshift1)]
     pub fn lshift1(&mut self, a: &BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_lshift1(self.as_ptr(), a.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_lshift1(self.as_ptr(), a.as_ptr())).map(|_| ()) }
     }
 
     /// Places `a >> 1` in `self`. Equivalent to `self / 2`.
     #[corresponds(BN_rshift1)]
     pub fn rshift1(&mut self, a: &BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_rshift1(self.as_ptr(), a.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_rshift1(self.as_ptr(), a.as_ptr())).map(|_| ()) }
     }
 
     /// Places `a + b` in `self`.  [`core::ops::Add`] is also implemented for `BigNumRef`.
@@ -274,7 +274,7 @@ impl BigNumRef {
     /// [`core::ops::Add`]: struct.BigNumRef.html#method.add
     #[corresponds(BN_add)]
     pub fn checked_add(&mut self, a: &BigNumRef, b: &BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_add(self.as_ptr(), a.as_ptr(), b.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_add(self.as_ptr(), a.as_ptr(), b.as_ptr())).map(|_| ()) }
     }
 
     /// Places `a - b` in `self`. [`core::ops::Sub`] is also implemented for `BigNumRef`.
@@ -282,34 +282,34 @@ impl BigNumRef {
     /// [`core::ops::Sub`]: struct.BigNumRef.html#method.sub
     #[corresponds(BN_sub)]
     pub fn checked_sub(&mut self, a: &BigNumRef, b: &BigNumRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_sub(self.as_ptr(), a.as_ptr(), b.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_sub(self.as_ptr(), a.as_ptr(), b.as_ptr())).map(|_| ()) }
     }
 
     /// Places `a << n` in `self`.  Equivalent to `a * 2 ^ n`.
     #[corresponds(BN_lshift)]
     #[allow(clippy::useless_conversion)]
     pub fn lshift(&mut self, a: &BigNumRef, n: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_lshift(self.as_ptr(), a.as_ptr(), n.into())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_lshift(self.as_ptr(), a.as_ptr(), n.into())).map(|_| ()) }
     }
 
     /// Places `a >> n` in `self`. Equivalent to `a / 2 ^ n`.
     #[corresponds(BN_rshift)]
     #[allow(clippy::useless_conversion)]
     pub fn rshift(&mut self, a: &BigNumRef, n: i32) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_rshift(self.as_ptr(), a.as_ptr(), n.into())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_rshift(self.as_ptr(), a.as_ptr(), n.into())).map(|_| ()) }
     }
 
     /// Creates a new BigNum with the same value.
     #[corresponds(BN_dup)]
     pub fn to_owned(&self) -> Result<BigNum, ErrorStack> {
-        unsafe { cvt_p(ffi::BN_dup(self.as_ptr())).map(|b| BigNum::from_ptr(b)) }
+        unsafe { cvt_p(ffi_10_55::BN_dup(self.as_ptr())).map(|b| BigNum::from_ptr(b)) }
     }
 
     /// Sets the sign of `self`.  Pass true to set `self` to a negative.  False sets
     /// `self` positive.
     #[corresponds(BN_set_negative)]
     pub fn set_negative(&mut self, negative: bool) {
-        unsafe { ffi::BN_set_negative(self.as_ptr(), negative as c_int) }
+        unsafe { ffi_10_55::BN_set_negative(self.as_ptr(), negative as c_int) }
     }
 
     /// Compare the absolute values of `self` and `oth`.
@@ -326,7 +326,7 @@ impl BigNumRef {
     /// ```
     #[corresponds(BN_ucmp)]
     pub fn ucmp(&self, oth: &BigNumRef) -> Ordering {
-        unsafe { ffi::BN_ucmp(self.as_ptr(), oth.as_ptr()).cmp(&0) }
+        unsafe { ffi_10_55::BN_ucmp(self.as_ptr(), oth.as_ptr()).cmp(&0) }
     }
 
     /// Returns `true` if `self` is negative.
@@ -339,7 +339,7 @@ impl BigNumRef {
     #[corresponds(BN_num_bits)]
     #[allow(clippy::unnecessary_cast)]
     pub fn num_bits(&self) -> i32 {
-        unsafe { ffi::BN_num_bits(self.as_ptr()) as i32 }
+        unsafe { ffi_10_55::BN_num_bits(self.as_ptr()) as i32 }
     }
 
     /// Returns the size of `self` in bytes. Implemented natively.
@@ -375,7 +375,7 @@ impl BigNumRef {
     #[allow(clippy::useless_conversion)]
     pub fn rand(&mut self, bits: i32, msb: MsbOption, odd: bool) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_rand(
+            cvt(ffi_10_55::BN_rand(
                 self.as_ptr(),
                 bits.into(),
                 msb.0,
@@ -391,7 +391,7 @@ impl BigNumRef {
     #[allow(clippy::useless_conversion)]
     pub fn pseudo_rand(&mut self, bits: i32, msb: MsbOption, odd: bool) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_pseudo_rand(
+            cvt(ffi_10_55::BN_pseudo_rand(
                 self.as_ptr(),
                 bits.into(),
                 msb.0,
@@ -433,7 +433,7 @@ impl BigNumRef {
         rem: Option<&BigNumRef>,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_generate_prime_ex(
+            cvt(ffi_10_55::BN_generate_prime_ex(
                 self.as_ptr(),
                 bits as c_int,
                 safe as c_int,
@@ -457,7 +457,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mul(
+            cvt(ffi_10_55::BN_mul(
                 self.as_ptr(),
                 a.as_ptr(),
                 b.as_ptr(),
@@ -479,7 +479,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_div(
+            cvt(ffi_10_55::BN_div(
                 self.as_ptr(),
                 ptr::null_mut(),
                 a.as_ptr(),
@@ -499,7 +499,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_div(
+            cvt(ffi_10_55::BN_div(
                 ptr::null_mut(),
                 self.as_ptr(),
                 a.as_ptr(),
@@ -520,7 +520,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_div(
+            cvt(ffi_10_55::BN_div(
                 self.as_ptr(),
                 rem.as_ptr(),
                 a.as_ptr(),
@@ -534,7 +534,7 @@ impl BigNumRef {
     /// Places the result of `a²` in `self`.
     #[corresponds(BN_sqr)]
     pub fn sqr(&mut self, a: &BigNumRef, ctx: &mut BigNumContextRef) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::BN_sqr(self.as_ptr(), a.as_ptr(), ctx.as_ptr())).map(|_| ()) }
+        unsafe { cvt(ffi_10_55::BN_sqr(self.as_ptr(), a.as_ptr(), ctx.as_ptr())).map(|_| ()) }
     }
 
     /// Places the result of `a mod m` in `self`.  As opposed to `div_rem`
@@ -547,7 +547,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_nnmod(
+            cvt(ffi_10_55::BN_nnmod(
                 self.as_ptr(),
                 a.as_ptr(),
                 m.as_ptr(),
@@ -567,7 +567,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mod_add(
+            cvt(ffi_10_55::BN_mod_add(
                 self.as_ptr(),
                 a.as_ptr(),
                 b.as_ptr(),
@@ -588,7 +588,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mod_sub(
+            cvt(ffi_10_55::BN_mod_sub(
                 self.as_ptr(),
                 a.as_ptr(),
                 b.as_ptr(),
@@ -609,7 +609,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mod_mul(
+            cvt(ffi_10_55::BN_mod_mul(
                 self.as_ptr(),
                 a.as_ptr(),
                 b.as_ptr(),
@@ -629,7 +629,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mod_sqr(
+            cvt(ffi_10_55::BN_mod_sqr(
                 self.as_ptr(),
                 a.as_ptr(),
                 m.as_ptr(),
@@ -648,7 +648,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_exp(
+            cvt(ffi_10_55::BN_exp(
                 self.as_ptr(),
                 a.as_ptr(),
                 p.as_ptr(),
@@ -668,7 +668,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_mod_exp(
+            cvt(ffi_10_55::BN_mod_exp(
                 self.as_ptr(),
                 a.as_ptr(),
                 p.as_ptr(),
@@ -688,7 +688,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt_p(ffi::BN_mod_inverse(
+            cvt_p(ffi_10_55::BN_mod_inverse(
                 self.as_ptr(),
                 a.as_ptr(),
                 n.as_ptr(),
@@ -707,7 +707,7 @@ impl BigNumRef {
         ctx: &mut BigNumContextRef,
     ) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::BN_gcd(
+            cvt(ffi_10_55::BN_gcd(
                 self.as_ptr(),
                 a.as_ptr(),
                 b.as_ptr(),
@@ -729,7 +729,7 @@ impl BigNumRef {
     #[allow(clippy::useless_conversion)]
     pub fn is_prime(&self, checks: i32, ctx: &mut BigNumContextRef) -> Result<bool, ErrorStack> {
         unsafe {
-            cvt_n(ffi::BN_is_prime_ex(
+            cvt_n(ffi_10_55::BN_is_prime_ex(
                 self.as_ptr(),
                 checks.into(),
                 ctx.as_ptr(),
@@ -758,7 +758,7 @@ impl BigNumRef {
         do_trial_division: bool,
     ) -> Result<bool, ErrorStack> {
         unsafe {
-            cvt_n(ffi::BN_is_prime_fasttest_ex(
+            cvt_n(ffi_10_55::BN_is_prime_fasttest_ex(
                 self.as_ptr(),
                 checks.into(),
                 ctx.as_ptr(),
@@ -786,7 +786,7 @@ impl BigNumRef {
         let size = self.num_bytes() as usize;
         let mut v = Vec::with_capacity(size);
         unsafe {
-            ffi::BN_bn2bin(self.as_ptr(), v.as_mut_ptr());
+            ffi_10_55::BN_bn2bin(self.as_ptr(), v.as_mut_ptr());
             v.set_len(size);
         }
         v
@@ -818,7 +818,7 @@ impl BigNumRef {
     pub fn to_vec_padded(&self, pad_to: i32) -> Result<Vec<u8>, ErrorStack> {
         let mut v = Vec::with_capacity(pad_to as usize);
         unsafe {
-            cvt(ffi::BN_bn2binpad(self.as_ptr(), v.as_mut_ptr(), pad_to))?;
+            cvt(ffi_10_55::BN_bn2binpad(self.as_ptr(), v.as_mut_ptr(), pad_to))?;
             v.set_len(pad_to as usize);
         }
         Ok(v)
@@ -835,7 +835,7 @@ impl BigNumRef {
     #[corresponds(BN_bn2dec)]
     pub fn to_dec_str(&self) -> Result<OpensslString, ErrorStack> {
         unsafe {
-            let buf = cvt_p(ffi::BN_bn2dec(self.as_ptr()))?;
+            let buf = cvt_p(ffi_10_55::BN_bn2dec(self.as_ptr()))?;
             Ok(OpensslString::from_ptr(buf))
         }
     }
@@ -851,7 +851,7 @@ impl BigNumRef {
     #[corresponds(BN_bn2hex)]
     pub fn to_hex_str(&self) -> Result<OpensslString, ErrorStack> {
         unsafe {
-            let buf = cvt_p(ffi::BN_bn2hex(self.as_ptr()))?;
+            let buf = cvt_p(ffi_10_55::BN_bn2hex(self.as_ptr()))?;
             Ok(OpensslString::from_ptr(buf))
         }
     }
@@ -860,7 +860,7 @@ impl BigNumRef {
     #[corresponds(BN_to_ASN1_INTEGER)]
     pub fn to_asn1_integer(&self) -> Result<Asn1Integer, ErrorStack> {
         unsafe {
-            cvt_p(ffi::BN_to_ASN1_INTEGER(self.as_ptr(), ptr::null_mut()))
+            cvt_p(ffi_10_55::BN_to_ASN1_INTEGER(self.as_ptr(), ptr::null_mut()))
                 .map(|p| Asn1Integer::from_ptr(p))
         }
     }
@@ -869,7 +869,7 @@ impl BigNumRef {
     #[corresponds(BN_set_flags)]
     #[cfg(ossl110)]
     pub fn set_const_time(&mut self) {
-        unsafe { ffi::BN_set_flags(self.as_ptr(), ffi::BN_FLG_CONSTTIME) }
+        unsafe { ffi_10_55::BN_set_flags(self.as_ptr(), ffi_10_55::BN_FLG_CONSTTIME) }
     }
 
     /// Returns true if `self` is in const time mode.
@@ -877,8 +877,8 @@ impl BigNumRef {
     #[cfg(ossl110)]
     pub fn is_const_time(&self) -> bool {
         unsafe {
-            let ret = ffi::BN_get_flags(self.as_ptr(), ffi::BN_FLG_CONSTTIME);
-            ret == ffi::BN_FLG_CONSTTIME
+            let ret = ffi_10_55::BN_get_flags(self.as_ptr(), ffi_10_55::BN_FLG_CONSTTIME);
+            ret == ffi_10_55::BN_FLG_CONSTTIME
         }
     }
 
@@ -887,8 +887,8 @@ impl BigNumRef {
     #[cfg(ossl110)]
     pub fn is_secure(&self) -> bool {
         unsafe {
-            let ret = ffi::BN_get_flags(self.as_ptr(), ffi::BN_FLG_SECURE);
-            ret == ffi::BN_FLG_SECURE
+            let ret = ffi_10_55::BN_get_flags(self.as_ptr(), ffi_10_55::BN_FLG_SECURE);
+            ret == ffi_10_55::BN_FLG_SECURE
         }
     }
 }
@@ -898,8 +898,8 @@ impl BigNum {
     #[corresponds(BN_new)]
     pub fn new() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
-            let v = cvt_p(ffi::BN_new())?;
+            ffi_10_55::init();
+            let v = cvt_p(ffi_10_55::BN_new())?;
             Ok(BigNum::from_ptr(v))
         }
     }
@@ -909,8 +909,8 @@ impl BigNum {
     #[cfg(ossl110)]
     pub fn new_secure() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
-            let v = cvt_p(ffi::BN_secure_new())?;
+            ffi_10_55::init();
+            let v = cvt_p(ffi_10_55::BN_secure_new())?;
             Ok(BigNum::from_ptr(v))
         }
     }
@@ -919,7 +919,7 @@ impl BigNum {
     #[corresponds(BN_set_word)]
     pub fn from_u32(n: u32) -> Result<BigNum, ErrorStack> {
         BigNum::new().and_then(|v| unsafe {
-            cvt(ffi::BN_set_word(v.as_ptr(), n as ffi::BN_ULONG)).map(|_| v)
+            cvt(ffi_10_55::BN_set_word(v.as_ptr(), n as ffi_10_55::BN_ULONG)).map(|_| v)
         })
     }
 
@@ -927,10 +927,10 @@ impl BigNum {
     #[corresponds(BN_dec2bn)]
     pub fn from_dec_str(s: &str) -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let c_str = CString::new(s.as_bytes()).unwrap();
             let mut bn = ptr::null_mut();
-            cvt(ffi::BN_dec2bn(&mut bn, c_str.as_ptr() as *const _))?;
+            cvt(ffi_10_55::BN_dec2bn(&mut bn, c_str.as_ptr() as *const _))?;
             Ok(BigNum::from_ptr(bn))
         }
     }
@@ -939,10 +939,10 @@ impl BigNum {
     #[corresponds(BN_hex2bn)]
     pub fn from_hex_str(s: &str) -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             let c_str = CString::new(s.as_bytes()).unwrap();
             let mut bn = ptr::null_mut();
-            cvt(ffi::BN_hex2bn(&mut bn, c_str.as_ptr() as *const _))?;
+            cvt(ffi_10_55::BN_hex2bn(&mut bn, c_str.as_ptr() as *const _))?;
             Ok(BigNum::from_ptr(bn))
         }
     }
@@ -956,7 +956,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc2409_prime_768() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc2409_prime_768(ptr::null_mut())).map(BigNum)
         }
     }
@@ -970,7 +970,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc2409_prime_1024() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc2409_prime_1024(ptr::null_mut())).map(BigNum)
         }
     }
@@ -984,7 +984,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_1536() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_1536(ptr::null_mut())).map(BigNum)
         }
     }
@@ -998,7 +998,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_2048() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_2048(ptr::null_mut())).map(BigNum)
         }
     }
@@ -1012,7 +1012,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_3072() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_3072(ptr::null_mut())).map(BigNum)
         }
     }
@@ -1026,7 +1026,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_4096() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_4096(ptr::null_mut())).map(BigNum)
         }
     }
@@ -1040,7 +1040,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_6144() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_6144(ptr::null_mut())).map(BigNum)
         }
     }
@@ -1054,7 +1054,7 @@ impl BigNum {
     #[cfg(not(boringssl))]
     pub fn get_rfc3526_prime_8192() -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             cvt_p(BN_get_rfc3526_prime_8192(ptr::null_mut())).map(BigNum)
         }
     }
@@ -1074,10 +1074,10 @@ impl BigNum {
     #[corresponds(BN_bin2bn)]
     pub fn from_slice(n: &[u8]) -> Result<BigNum, ErrorStack> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
             assert!(n.len() <= LenType::max_value() as usize);
 
-            cvt_p(ffi::BN_bin2bn(
+            cvt_p(ffi_10_55::BN_bin2bn(
                 n.as_ptr(),
                 n.len() as LenType,
                 ptr::null_mut(),
@@ -1105,7 +1105,7 @@ impl BigNum {
         unsafe {
             assert!(n.len() <= LenType::max_value() as usize);
 
-            cvt_p(ffi::BN_bin2bn(n.as_ptr(), n.len() as LenType, self.0))?;
+            cvt_p(ffi_10_55::BN_bin2bn(n.as_ptr(), n.len() as LenType, self.0))?;
             Ok(())
         }
     }
@@ -1189,7 +1189,7 @@ impl PartialOrd<BigNum> for BigNumRef {
 
 impl Ord for BigNumRef {
     fn cmp(&self, oth: &BigNumRef) -> Ordering {
-        unsafe { ffi::BN_cmp(self.as_ptr(), oth.as_ptr()).cmp(&0) }
+        unsafe { ffi_10_55::BN_cmp(self.as_ptr(), oth.as_ptr()).cmp(&0) }
     }
 }
 

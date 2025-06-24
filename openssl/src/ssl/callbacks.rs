@@ -34,7 +34,7 @@ use crate::util::ForeignTypeRefExt;
 use crate::x509::X509Ref;
 use crate::x509::{X509StoreContext, X509StoreContextRef};
 
-pub extern "C" fn raw_verify<F>(preverify_ok: c_int, x509_ctx: *mut ffi::X509_STORE_CTX) -> c_int
+pub extern "C" fn raw_verify<F>(preverify_ok: c_int, x509_ctx: *mut ffi_10_55::X509_STORE_CTX) -> c_int
 where
     F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,
 {
@@ -58,7 +58,7 @@ where
 
 #[cfg(not(osslconf = "OPENSSL_NO_PSK"))]
 pub extern "C" fn raw_client_psk<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     hint: *const c_char,
     identity: *mut c_char,
     max_identity_len: c_uint,
@@ -99,7 +99,7 @@ where
 
 #[cfg(not(osslconf = "OPENSSL_NO_PSK"))]
 pub extern "C" fn raw_server_psk<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     identity: *const c_char,
     psk: *mut c_uchar,
     max_psk_len: c_uint,
@@ -137,7 +137,7 @@ where
 
 pub extern "C" fn ssl_raw_verify<F>(
     preverify_ok: c_int,
-    x509_ctx: *mut ffi::X509_STORE_CTX,
+    x509_ctx: *mut ffi_10_55::X509_STORE_CTX,
 ) -> c_int
 where
     F: Fn(bool, &mut X509StoreContextRef) -> bool + 'static + Sync + Send,
@@ -158,7 +158,7 @@ where
     }
 }
 
-pub extern "C" fn raw_sni<F>(ssl: *mut ffi::SSL, al: *mut c_int, arg: *mut c_void) -> c_int
+pub extern "C" fn raw_sni<F>(ssl: *mut ffi_10_55::SSL, al: *mut c_int, arg: *mut c_void) -> c_int
 where
     F: Fn(&mut SslRef, &mut SslAlert) -> Result<(), SniError> + 'static + Sync + Send,
 {
@@ -170,7 +170,7 @@ where
         let r = (*callback)(ssl, &mut alert);
         *al = alert.0;
         match r {
-            Ok(()) => ffi::SSL_TLSEXT_ERR_OK,
+            Ok(()) => ffi_10_55::SSL_TLSEXT_ERR_OK,
             Err(e) => e.0,
         }
     }
@@ -178,7 +178,7 @@ where
 
 #[cfg(any(ossl102, libressl261))]
 pub extern "C" fn raw_alpn_select<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     out: *mut *const c_uchar,
     outlen: *mut c_uchar,
     inbuf: *const c_uchar,
@@ -200,7 +200,7 @@ where
             Ok(proto) => {
                 *out = proto.as_ptr() as *const c_uchar;
                 *outlen = proto.len() as c_uchar;
-                ffi::SSL_TLSEXT_ERR_OK
+                ffi_10_55::SSL_TLSEXT_ERR_OK
             }
             Err(e) => e.0,
         }
@@ -208,10 +208,10 @@ where
 }
 
 pub unsafe extern "C" fn raw_tmp_dh<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     is_export: c_int,
     keylength: c_int,
-) -> *mut ffi::DH
+) -> *mut ffi_10_55::DH
 where
     F: Fn(&mut SslRef, bool, u32) -> Result<Dh<Params>, ErrorStack> + 'static + Sync + Send,
 {
@@ -236,10 +236,10 @@ where
 
 #[cfg(all(ossl101, not(ossl110)))]
 pub unsafe extern "C" fn raw_tmp_ecdh<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     is_export: c_int,
     keylength: c_int,
-) -> *mut ffi::EC_KEY
+) -> *mut ffi_10_55::EC_KEY
 where
     F: Fn(&mut SslRef, bool, u32) -> Result<EcKey<Params>, ErrorStack> + 'static + Sync + Send,
 {
@@ -263,10 +263,10 @@ where
 }
 
 pub unsafe extern "C" fn raw_tmp_dh_ssl<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     is_export: c_int,
     keylength: c_int,
-) -> *mut ffi::DH
+) -> *mut ffi_10_55::DH
 where
     F: Fn(&mut SslRef, bool, u32) -> Result<Dh<Params>, ErrorStack> + 'static + Sync + Send,
 {
@@ -291,10 +291,10 @@ where
 
 #[cfg(all(ossl101, not(ossl110)))]
 pub unsafe extern "C" fn raw_tmp_ecdh_ssl<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     is_export: c_int,
     keylength: c_int,
-) -> *mut ffi::EC_KEY
+) -> *mut ffi_10_55::EC_KEY
 where
     F: Fn(&mut SslRef, bool, u32) -> Result<EcKey<Params>, ErrorStack> + 'static + Sync + Send,
 {
@@ -317,7 +317,7 @@ where
     }
 }
 
-pub unsafe extern "C" fn raw_tlsext_status<F>(ssl: *mut ffi::SSL, _: *mut c_void) -> c_int
+pub unsafe extern "C" fn raw_tlsext_status<F>(ssl: *mut ffi_10_55::SSL, _: *mut c_void) -> c_int
 where
     F: Fn(&mut SslRef) -> Result<bool, ErrorStack> + 'static + Sync + Send,
 {
@@ -330,11 +330,11 @@ where
 
     if ssl.is_server() {
         match ret {
-            Ok(true) => ffi::SSL_TLSEXT_ERR_OK,
-            Ok(false) => ffi::SSL_TLSEXT_ERR_NOACK,
+            Ok(true) => ffi_10_55::SSL_TLSEXT_ERR_OK,
+            Ok(false) => ffi_10_55::SSL_TLSEXT_ERR_NOACK,
             Err(e) => {
                 e.put();
-                ffi::SSL_TLSEXT_ERR_ALERT_FATAL
+                ffi_10_55::SSL_TLSEXT_ERR_ALERT_FATAL
             }
         }
     } else {
@@ -350,8 +350,8 @@ where
 }
 
 pub unsafe extern "C" fn raw_new_session<F>(
-    ssl: *mut ffi::SSL,
-    session: *mut ffi::SSL_SESSION,
+    ssl: *mut ffi_10_55::SSL,
+    session: *mut ffi_10_55::SSL_SESSION,
 ) -> c_int
 where
     F: Fn(&mut SslRef, SslSession) + 'static + Sync + Send,
@@ -373,8 +373,8 @@ where
 }
 
 pub unsafe extern "C" fn raw_remove_session<F>(
-    ctx: *mut ffi::SSL_CTX,
-    session: *mut ffi::SSL_SESSION,
+    ctx: *mut ffi_10_55::SSL_CTX,
+    session: *mut ffi_10_55::SSL_SESSION,
 ) where
     F: Fn(&SslContextRef, &SslSessionRef) + 'static + Sync + Send,
 {
@@ -396,11 +396,11 @@ cfg_if! {
 }
 
 pub unsafe extern "C" fn raw_get_session<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     data: DataPtr,
     len: c_int,
     copy: *mut c_int,
-) -> *mut ffi::SSL_SESSION
+) -> *mut ffi_10_55::SSL_SESSION
 where
     F: Fn(&mut SslRef, &[u8]) -> Option<SslSession> + 'static + Sync + Send,
 {
@@ -426,7 +426,7 @@ where
 }
 
 #[cfg(ossl111)]
-pub unsafe extern "C" fn raw_keylog<F>(ssl: *const ffi::SSL, line: *const c_char)
+pub unsafe extern "C" fn raw_keylog<F>(ssl: *const ffi_10_55::SSL, line: *const c_char)
 where
     F: Fn(&SslRef, &str) + 'static + Sync + Send,
 {
@@ -443,7 +443,7 @@ where
 
 #[cfg(ossl111)]
 pub unsafe extern "C" fn raw_stateless_cookie_generate<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     cookie: *mut c_uchar,
     cookie_len: *mut size_t,
 ) -> c_int
@@ -455,7 +455,7 @@ where
         .ssl_context()
         .ex_data(SslContext::cached_ex_index::<F>())
         .expect("BUG: stateless cookie generate callback missing") as *const F;
-    let slice = slice::from_raw_parts_mut(cookie as *mut u8, ffi::SSL_COOKIE_LENGTH as usize);
+    let slice = slice::from_raw_parts_mut(cookie as *mut u8, ffi_10_55::SSL_COOKIE_LENGTH as usize);
     match (*callback)(ssl, slice) {
         Ok(len) => {
             *cookie_len = len as size_t;
@@ -470,7 +470,7 @@ where
 
 #[cfg(ossl111)]
 pub unsafe extern "C" fn raw_stateless_cookie_verify<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     cookie: *const c_uchar,
     cookie_len: size_t,
 ) -> c_int
@@ -488,7 +488,7 @@ where
 
 #[cfg(not(boringssl))]
 pub extern "C" fn raw_cookie_generate<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     cookie: *mut c_uchar,
     cookie_len: *mut c_uint,
 ) -> c_int
@@ -504,7 +504,7 @@ where
         // We subtract 1 from DTLS1_COOKIE_LENGTH as the ostensible value, 256, is erroneous but retained for
         // compatibility. See comments in dtls1.h.
         let slice =
-            slice::from_raw_parts_mut(cookie as *mut u8, ffi::DTLS1_COOKIE_LENGTH as usize - 1);
+            slice::from_raw_parts_mut(cookie as *mut u8, ffi_10_55::DTLS1_COOKIE_LENGTH as usize - 1);
         match (*callback)(ssl, slice) {
             Ok(len) => {
                 *cookie_len = len as c_uint;
@@ -529,7 +529,7 @@ cfg_if! {
 
 #[cfg(not(boringssl))]
 pub extern "C" fn raw_cookie_verify<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     cookie: CookiePtr,
     cookie_len: c_uint,
 ) -> c_int
@@ -553,12 +553,12 @@ pub struct CustomExtAddState<T>(Option<T>);
 
 #[cfg(ossl111)]
 pub extern "C" fn raw_custom_ext_add<F, T>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     _: c_uint,
     context: c_uint,
     out: *mut *const c_uchar,
     outlen: *mut size_t,
-    x: *mut ffi::X509,
+    x: *mut ffi_10_55::X509,
     chainidx: size_t,
     al: *mut c_int,
     _: *mut c_void,
@@ -612,7 +612,7 @@ where
 
 #[cfg(ossl111)]
 pub extern "C" fn raw_custom_ext_free<T>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     _: c_uint,
     _: c_uint,
     _: *const c_uchar,
@@ -631,12 +631,12 @@ pub extern "C" fn raw_custom_ext_free<T>(
 
 #[cfg(ossl111)]
 pub extern "C" fn raw_custom_ext_parse<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     _: c_uint,
     context: c_uint,
     input: *const c_uchar,
     inlen: size_t,
-    x: *mut ffi::X509,
+    x: *mut ffi_10_55::X509,
     chainidx: size_t,
     al: *mut c_int,
     _: *mut c_void,
@@ -672,7 +672,7 @@ where
 
 #[cfg(ossl111)]
 pub unsafe extern "C" fn raw_client_hello<F>(
-    ssl: *mut ffi::SSL,
+    ssl: *mut ffi_10_55::SSL,
     al: *mut c_int,
     arg: *mut c_void,
 ) -> c_int
@@ -692,7 +692,7 @@ where
         Ok(c) => c.0,
         Err(e) => {
             e.put();
-            ffi::SSL_CLIENT_HELLO_ERROR
+            ffi_10_55::SSL_CLIENT_HELLO_ERROR
         }
     }
 }

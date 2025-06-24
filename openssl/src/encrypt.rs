@@ -52,7 +52,7 @@ use foreign_types::ForeignTypeRef;
 
 /// A type which encrypts data.
 pub struct Encrypter<'a> {
-    pctx: *mut ffi::EVP_PKEY_CTX,
+    pctx: *mut ffi_10_55::EVP_PKEY_CTX,
     _p: PhantomData<&'a ()>,
 }
 
@@ -62,7 +62,7 @@ unsafe impl<'a> Send for Encrypter<'a> {}
 impl<'a> Drop for Encrypter<'a> {
     fn drop(&mut self) {
         unsafe {
-            ffi::EVP_PKEY_CTX_free(self.pctx);
+            ffi_10_55::EVP_PKEY_CTX_free(self.pctx);
         }
     }
 }
@@ -78,12 +78,12 @@ impl<'a> Encrypter<'a> {
         T: HasPublic,
     {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
-            let pctx = cvt_p(ffi::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
-            let r = ffi::EVP_PKEY_encrypt_init(pctx);
+            let pctx = cvt_p(ffi_10_55::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
+            let r = ffi_10_55::EVP_PKEY_encrypt_init(pctx);
             if r != 1 {
-                ffi::EVP_PKEY_CTX_free(pctx);
+                ffi_10_55::EVP_PKEY_CTX_free(pctx);
                 return Err(ErrorStack::get());
             }
 
@@ -102,7 +102,7 @@ impl<'a> Encrypter<'a> {
     pub fn rsa_padding(&self) -> Result<Padding, ErrorStack> {
         unsafe {
             let mut pad = 0;
-            cvt(ffi::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
+            cvt(ffi_10_55::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
                 .map(|_| Padding::from_raw(pad))
         }
     }
@@ -116,7 +116,7 @@ impl<'a> Encrypter<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_padding`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_padding.html
     pub fn set_rsa_padding(&mut self, padding: Padding) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_padding(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_padding(
                 self.pctx,
                 padding.as_raw(),
             ))
@@ -133,7 +133,7 @@ impl<'a> Encrypter<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_mgf1_md`]: https://www.openssl.org/docs/manmaster/man7/RSA-PSS.html
     pub fn set_rsa_mgf1_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_mgf1_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_mgf1_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -151,7 +151,7 @@ impl<'a> Encrypter<'a> {
     #[cfg(any(ossl102, libressl310))]
     pub fn set_rsa_oaep_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_oaep_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_oaep_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -169,17 +169,17 @@ impl<'a> Encrypter<'a> {
     #[cfg(any(ossl102, libressl310))]
     pub fn set_rsa_oaep_label(&mut self, label: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            let p = cvt_p(ffi::OPENSSL_malloc(label.len() as _))?;
+            let p = cvt_p(ffi_10_55::OPENSSL_malloc(label.len() as _))?;
             ptr::copy_nonoverlapping(label.as_ptr(), p as *mut u8, label.len());
 
-            cvt(ffi::EVP_PKEY_CTX_set0_rsa_oaep_label(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set0_rsa_oaep_label(
                 self.pctx,
                 p as *mut c_void,
                 label.len() as c_int,
             ))
             .map(|_| ())
             .map_err(|e| {
-                ffi::OPENSSL_free(p);
+                ffi_10_55::OPENSSL_free(p);
                 e
             })
         }
@@ -221,7 +221,7 @@ impl<'a> Encrypter<'a> {
     pub fn encrypt(&self, from: &[u8], to: &mut [u8]) -> Result<usize, ErrorStack> {
         let mut written = to.len();
         unsafe {
-            cvt(ffi::EVP_PKEY_encrypt(
+            cvt(ffi_10_55::EVP_PKEY_encrypt(
                 self.pctx,
                 to.as_mut_ptr(),
                 &mut written,
@@ -241,7 +241,7 @@ impl<'a> Encrypter<'a> {
     pub fn encrypt_len(&self, from: &[u8]) -> Result<usize, ErrorStack> {
         let mut written = 0;
         unsafe {
-            cvt(ffi::EVP_PKEY_encrypt(
+            cvt(ffi_10_55::EVP_PKEY_encrypt(
                 self.pctx,
                 ptr::null_mut(),
                 &mut written,
@@ -256,7 +256,7 @@ impl<'a> Encrypter<'a> {
 
 /// A type which decrypts data.
 pub struct Decrypter<'a> {
-    pctx: *mut ffi::EVP_PKEY_CTX,
+    pctx: *mut ffi_10_55::EVP_PKEY_CTX,
     _p: PhantomData<&'a ()>,
 }
 
@@ -266,7 +266,7 @@ unsafe impl<'a> Send for Decrypter<'a> {}
 impl<'a> Drop for Decrypter<'a> {
     fn drop(&mut self) {
         unsafe {
-            ffi::EVP_PKEY_CTX_free(self.pctx);
+            ffi_10_55::EVP_PKEY_CTX_free(self.pctx);
         }
     }
 }
@@ -282,12 +282,12 @@ impl<'a> Decrypter<'a> {
         T: HasPrivate,
     {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
-            let pctx = cvt_p(ffi::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
-            let r = ffi::EVP_PKEY_decrypt_init(pctx);
+            let pctx = cvt_p(ffi_10_55::EVP_PKEY_CTX_new(pkey.as_ptr(), ptr::null_mut()))?;
+            let r = ffi_10_55::EVP_PKEY_decrypt_init(pctx);
             if r != 1 {
-                ffi::EVP_PKEY_CTX_free(pctx);
+                ffi_10_55::EVP_PKEY_CTX_free(pctx);
                 return Err(ErrorStack::get());
             }
 
@@ -306,7 +306,7 @@ impl<'a> Decrypter<'a> {
     pub fn rsa_padding(&self) -> Result<Padding, ErrorStack> {
         unsafe {
             let mut pad = 0;
-            cvt(ffi::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
+            cvt(ffi_10_55::EVP_PKEY_CTX_get_rsa_padding(self.pctx, &mut pad))
                 .map(|_| Padding::from_raw(pad))
         }
     }
@@ -320,7 +320,7 @@ impl<'a> Decrypter<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_padding`]: https://www.openssl.org/docs/manmaster/crypto/EVP_PKEY_CTX_set_rsa_padding.html
     pub fn set_rsa_padding(&mut self, padding: Padding) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_padding(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_padding(
                 self.pctx,
                 padding.as_raw(),
             ))
@@ -337,7 +337,7 @@ impl<'a> Decrypter<'a> {
     /// [`EVP_PKEY_CTX_set_rsa_mgf1_md`]: https://www.openssl.org/docs/manmaster/man7/RSA-PSS.html
     pub fn set_rsa_mgf1_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_mgf1_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_mgf1_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -355,7 +355,7 @@ impl<'a> Decrypter<'a> {
     #[cfg(any(ossl102, libressl310))]
     pub fn set_rsa_oaep_md(&mut self, md: MessageDigest) -> Result<(), ErrorStack> {
         unsafe {
-            cvt(ffi::EVP_PKEY_CTX_set_rsa_oaep_md(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set_rsa_oaep_md(
                 self.pctx,
                 md.as_ptr() as *mut _,
             ))
@@ -373,17 +373,17 @@ impl<'a> Decrypter<'a> {
     #[cfg(any(ossl102, libressl310))]
     pub fn set_rsa_oaep_label(&mut self, label: &[u8]) -> Result<(), ErrorStack> {
         unsafe {
-            let p = cvt_p(ffi::OPENSSL_malloc(label.len() as _))?;
+            let p = cvt_p(ffi_10_55::OPENSSL_malloc(label.len() as _))?;
             ptr::copy_nonoverlapping(label.as_ptr(), p as *mut u8, label.len());
 
-            cvt(ffi::EVP_PKEY_CTX_set0_rsa_oaep_label(
+            cvt(ffi_10_55::EVP_PKEY_CTX_set0_rsa_oaep_label(
                 self.pctx,
                 p as *mut c_void,
                 label.len() as c_int,
             ))
             .map(|_| ())
             .map_err(|e| {
-                ffi::OPENSSL_free(p);
+                ffi_10_55::OPENSSL_free(p);
                 e
             })
         }
@@ -440,7 +440,7 @@ impl<'a> Decrypter<'a> {
     pub fn decrypt(&self, from: &[u8], to: &mut [u8]) -> Result<usize, ErrorStack> {
         let mut written = to.len();
         unsafe {
-            cvt(ffi::EVP_PKEY_decrypt(
+            cvt(ffi_10_55::EVP_PKEY_decrypt(
                 self.pctx,
                 to.as_mut_ptr(),
                 &mut written,
@@ -460,7 +460,7 @@ impl<'a> Decrypter<'a> {
     pub fn decrypt_len(&self, from: &[u8]) -> Result<usize, ErrorStack> {
         let mut written = 0;
         unsafe {
-            cvt(ffi::EVP_PKEY_decrypt(
+            cvt(ffi_10_55::EVP_PKEY_decrypt(
                 self.pctx,
                 ptr::null_mut(),
                 &mut written,

@@ -112,7 +112,7 @@ impl Error {
     /// Returns the first error on the OpenSSL error stack.
     pub fn get() -> Option<Error> {
         unsafe {
-            ffi::init();
+            ffi_10_55::init();
 
             let mut file = ptr::null();
             let mut line = 0;
@@ -124,11 +124,11 @@ impl Error {
                 code => {
                     // The memory referenced by data is only valid until that slot is overwritten
                     // in the error stack, so we'll need to copy it off if it's dynamic
-                    let data = if flags & ffi::ERR_TXT_STRING != 0 {
+                    let data = if flags & ffi_10_55::ERR_TXT_STRING != 0 {
                         let bytes = CStr::from_ptr(data as *const _).to_bytes();
                         let data = str::from_utf8(bytes).unwrap();
                         #[cfg(not(boringssl))]
-                        let data = if flags & ffi::ERR_TXT_MALLOCED != 0 {
+                        let data = if flags & ffi_10_55::ERR_TXT_MALLOCED != 0 {
                             Cow::Owned(data.to_string())
                         } else {
                             Cow::Borrowed(data)
@@ -168,7 +168,7 @@ impl Error {
             let data = match self.data {
                 Some(Cow::Borrowed(data)) => Some((data.as_ptr() as *mut c_char, 0)),
                 Some(Cow::Owned(ref data)) => {
-                    let ptr = ffi::CRYPTO_malloc(
+                    let ptr = ffi_10_55::CRYPTO_malloc(
                         (data.len() + 1) as _,
                         concat!(file!(), "\0").as_ptr() as _,
                         line!() as _,
@@ -178,13 +178,13 @@ impl Error {
                     } else {
                         ptr::copy_nonoverlapping(data.as_ptr(), ptr as *mut u8, data.len());
                         *ptr.add(data.len()) = 0;
-                        Some((ptr, ffi::ERR_TXT_MALLOCED))
+                        Some((ptr, ffi_10_55::ERR_TXT_MALLOCED))
                     }
                 }
                 None => None,
             };
             if let Some((ptr, flags)) = data {
-                ffi::ERR_set_error_data(ptr, flags | ffi::ERR_TXT_STRING);
+                ffi_10_55::ERR_set_error_data(ptr, flags | ffi_10_55::ERR_TXT_STRING);
             }
         }
     }
@@ -192,13 +192,13 @@ impl Error {
     #[cfg(ossl300)]
     fn put_error(&self) {
         unsafe {
-            ffi::ERR_new();
-            ffi::ERR_set_debug(
+            ffi_10_55::ERR_new();
+            ffi_10_55::ERR_set_debug(
                 self.file.as_ptr(),
                 self.line,
                 self.func.as_ref().map_or(ptr::null(), |s| s.as_ptr()),
             );
-            ffi::ERR_set_error(self.library_code(), self.reason_code(), ptr::null());
+            ffi_10_55::ERR_set_error(self.library_code(), self.reason_code(), ptr::null());
         }
     }
 
@@ -209,9 +209,9 @@ impl Error {
         #[cfg(boringssl)]
         let line = self.line.try_into().unwrap();
         unsafe {
-            ffi::ERR_put_error(
+            ffi_10_55::ERR_put_error(
                 self.library_code(),
-                ffi::ERR_GET_FUNC(self.code),
+                ffi_10_55::ERR_GET_FUNC(self.code),
                 self.reason_code(),
                 self.file.as_ptr(),
                 line,
@@ -227,7 +227,7 @@ impl Error {
     /// Returns the name of the library reporting the error, if available.
     pub fn library(&self) -> Option<&'static str> {
         unsafe {
-            let cstr = ffi::ERR_lib_error_string(self.code);
+            let cstr = ffi_10_55::ERR_lib_error_string(self.code);
             if cstr.is_null() {
                 return None;
             }
@@ -242,7 +242,7 @@ impl Error {
     // OpenSSL/LibreSSL they're safe.
     #[allow(unused_unsafe)]
     pub fn library_code(&self) -> libc::c_int {
-        unsafe { ffi::ERR_GET_LIB(self.code) }
+        unsafe { ffi_10_55::ERR_GET_LIB(self.code) }
     }
 
     /// Returns the name of the function reporting the error.
@@ -253,7 +253,7 @@ impl Error {
     /// Returns the reason for the error.
     pub fn reason(&self) -> Option<&'static str> {
         unsafe {
-            let cstr = ffi::ERR_reason_error_string(self.code);
+            let cstr = ffi_10_55::ERR_reason_error_string(self.code);
             if cstr.is_null() {
                 return None;
             }
@@ -267,7 +267,7 @@ impl Error {
     // OpenSSL/LibreSSL they're safe.
     #[allow(unused_unsafe)]
     pub fn reason_code(&self) -> libc::c_int {
-        unsafe { ffi::ERR_GET_REASON(self.code) }
+        unsafe { ffi_10_55::ERR_GET_REASON(self.code) }
     }
 
     /// Returns the name of the source file which encountered the error.
@@ -321,7 +321,7 @@ impl fmt::Display for Error {
         }
         match self.function() {
             Some(f) => write!(fmt, ":{}", f)?,
-            None => write!(fmt, ":func({})", unsafe { ffi::ERR_GET_FUNC(self.code()) })?,
+            None => write!(fmt, ":func({})", unsafe { ffi_10_55::ERR_GET_FUNC(self.code()) })?,
         }
         match self.reason() {
             Some(r) => write!(fmt, ":{}", r)?,
@@ -342,7 +342,7 @@ impl error::Error for Error {}
 cfg_if! {
     if #[cfg(ossl300)] {
         use std::ffi::{CString};
-        use ffi::ERR_get_error_all;
+        use ffi_10_55::ERR_get_error_all;
 
         type RetStr<'a> = &'a str;
 
@@ -371,8 +371,8 @@ cfg_if! {
             data: *mut *const c_char,
             flags: *mut c_int,
         ) -> ErrType {
-            let code = ffi::ERR_get_error_line_data(file, line, data, flags);
-            *func = ffi::ERR_func_error_string(code);
+            let code = ffi_10_55::ERR_get_error_line_data(file, line, data, flags);
+            *func = ffi_10_55::ERR_func_error_string(code);
             code
         }
 
@@ -411,8 +411,8 @@ mod tests {
         let stack = Nid::create("not-an-oid", "invalid", "invalid").unwrap_err();
         let errors = stack.errors();
         #[cfg(not(boringssl))]
-        assert_eq!(errors[0].library_code(), ffi::ERR_LIB_ASN1);
+        assert_eq!(errors[0].library_code(), ffi_10_55::ERR_LIB_ASN1);
         #[cfg(boringssl)]
-        assert_eq!(errors[0].library_code(), ffi::ERR_LIB_OBJ as libc::c_int);
+        assert_eq!(errors[0].library_code(), ffi_10_55::ERR_LIB_OBJ as libc::c_int);
     }
 }
